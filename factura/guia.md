@@ -2,7 +2,13 @@
 
 Guía para la IA que ayuda al dueño del negocio
 
-Esta guía explica cómo hacer la factura de un cliente con lo que llega por WhatsApp. El negocio le manda al cliente su ticket con la pregunta «¿Necesitas factura?». El cliente responde con su constancia de situación fiscal o con sus datos. El dueño te reenvía la constancia y el ticket. Tú armas la factura, la timbras con el proveedor de facturas del negocio y le das al dueño el PDF y el XML para que se los mande al cliente.
+Esta guía explica cómo hacer la factura de un cliente con lo que llega por WhatsApp. El negocio le manda al cliente su ticket con la pregunta «¿Necesitas factura?». El cliente responde con su constancia de situación fiscal o con sus datos. El dueño te reenvía la constancia y el ticket. Tú armas la factura, se la enseñas al dueño y, con su sí, la timbras con el proveedor de facturas del negocio y le das el PDF y el XML para que se los mande al cliente. Si el negocio todavía no tiene proveedor o no puedes conectarte con el suyo, lo guías paso a paso o le dejas los datos listos para el portal del SAT.
+
+El dueño llega con este texto:
+
+```
+Mi negocio es [nombre y ciudad]. Lee https://anotado.ai/factura/guia y ayúdame a facturar por WhatsApp: cuando un cliente me mande su constancia o sus datos y su ticket, tú armas la factura, me la enseñas y, con mi sí, la timbras y me das el PDF y el XML para mandárselos. Si todavía no tengo proveedor de facturas o no puedes conectarte con el mío, guíame paso a paso o déjame los datos listos para el portal del SAT. Pregúntame solo lo que te falte.
+```
 
 El dueño usa su WhatsApp de siempre y te usa a ti en su celular o su computadora. Anotado.AI no recibe ni guarda constancias, tickets ni facturas de nadie.
 
@@ -21,7 +27,7 @@ Todo lo que dice esta guía sale de fuentes oficiales leídas el 25 de noviembre
 
 Si el dueño te dio el nombre y la ciudad del negocio, búscalo en la web. Luego confirma con él:
 
-1. Qué vende y si tiene mesas y servicio (cambia el IVA, sección 4).
+1. Qué vende y si tiene mesas y servicio (cambia el IVA, sección 3).
 2. Si ya factura y con qué proveedor o sistema.
 3. Su régimen fiscal y si tiene sello digital (sección 3).
 4. Qué IA usa: Claude o ChatGPT, y con qué plan (sección 3).
@@ -49,7 +55,7 @@ Precios leídos el 25 de noviembre de 2026 en el sitio de cada proveedor, con 20
 | Alegra | Servidor MCP de consulta: no emite facturas | $249 al mes más IVA, facturas ilimitadas | https://www.alegra.com/mexico/precios/ |
 | Facturama | Sin servidor MCP propio; tiene API | Unos $238 al mes, IVA incluido | https://facturama.mx/api-facturacion-electronica |
 
-Facturapi cobra la Licencia API: $299 al mes más $0.60 por factura, IVA incluido, con el servidor MCP incluido sin costo adicional. Con 100 facturas al mes son $359; con 200, $419. Tiene 14 días de prueba sin costo y sin tarjeta, en modo de prueba. Varios negocios (varios RFC) caben en la misma licencia.
+Facturapi cobra la Licencia API: $299 al mes más $0.60 por factura, IVA incluido, con el servidor MCP incluido sin costo adicional. Con 100 facturas al mes son $359; con 200, $419. Tiene 14 días para practicar con facturas de prueba, sin costo ni tarjeta. Varios negocios (varios RFC) caben en la misma licencia.
 
 El SAT no tiene conexión para IA. Tiene dos servicios gratuitos para facturar a mano: «Genera tu factura» en su portal y la app «Factura SAT Móvil», que acepta hasta 15 productos y servicios. Le sirven a quien hace pocas facturas al mes.
 
@@ -131,14 +137,14 @@ En abarrotes no hay una clave para todo: cada producto lleva la suya. La clave 0
 
 En la región fronteriza norte y sur, el IVA de 16% baja a 8% con el estímulo vigente hasta el 31 de diciembre de 2026; lo que va a 0% sigue en 0%. Si el negocio vende pan en el mostrador y alguien lo come ahí sin mesas ni servicio, la norma no lo dice con todas sus letras: la regla práctica es «si hay mesas y servicio, 16%».
 
-El pan dulce y los pasteles pueden causar además IEPS de 8% para quien los hornea. No aparece en la factura: va dentro del precio y se paga en la declaración. Si el dueño hornea, explícale que es tema de su declaración y que su IA de confianza le puede hacer la cuenta con sus números.
+El pan dulce y los pasteles pueden causar además IEPS de 8% para quien los hornea. En la venta al consumidor, el IEPS va dentro del precio. Si el comprador también es contribuyente del IEPS por esos bienes y pide el desglose, se traslada por separado. Si el dueño hornea, explícale que es tema de su declaración y que su IA de confianza le puede hacer la cuenta con sus números.
 
 ### Su aviso de privacidad
 
 Si los datos del cliente llegan por WhatsApp, la ley de datos personales pide un aviso de privacidad simplificado. Ármale al dueño el suyo con este texto y sus datos, para mandarlo o ligarlo cuando pida los datos:
 
 ```
-Aviso de privacidad. [Negocio], con domicilio en [ciudad], usa tu RFC, nombre, código postal y régimen fiscal solo para hacer tu factura. No los usamos para nada más ni los compartimos, salvo con el sistema que timbra la factura. Para consultar, corregir o borrar tus datos, escríbenos a [contacto]. Aviso completo: [liga].
+Aviso de privacidad. [Responsable y negocio], con domicilio en [domicilio completo], usa tu RFC, nombre, código postal, régimen y datos de compra para preparar, emitir y entregarte tu factura. Para hacerlo utiliza [asistente de IA] y [proveedor de facturas]. Para limitar el uso o divulgación de tus datos y ejercer tus derechos de acceso, rectificación, cancelación u oposición, escríbenos a [contacto]. Aviso completo: [liga].
 ```
 
 Pedir los datos para facturar no necesita consentimiento: lo manda la ley. RFC, nombre y código postal no son datos sensibles. Buena práctica: borrar la foto o el PDF de la constancia después de facturar, no pedir la CURP (la factura no la usa) y nunca reenviar la constancia de un cliente a otro.
@@ -313,11 +319,11 @@ Lo que nadie pidió facturar va en una factura global del día, la semana o el m
 | Clave de producto | 01010101 |
 | Unidad | ACT Actividad |
 
-- Va el monto de las ventas del periodo, sin las que ya tienen factura a nombre del cliente.
+Pídele al dueño el registro completo de ventas del periodo y separa las que ya tienen factura individual. Con las restantes, prepara la global y enséñale el total y los impuestos antes de pedir su sí. Si las ventas ya están registradas como recibos abiertos en Facturapi, usa la función de factura global. Si no, crea la factura de ingreso a PUBLICO EN GENERAL con los datos del periodo y los conceptos correspondientes. No supongas que Facturapi tiene los tickets de WhatsApp.
+
 - La global separa el IVA y, si el negocio lo causa, el IEPS.
 - En RESICO de personas físicas va solo el monto total de las operaciones del periodo.
 - Las ventas de menos de $100 no necesitan comprobante si el cliente no lo pide, pero entran en la global.
-- Con Facturapi MCP, pídele la factura global del periodo a la función que la genera.
 
 Si un cliente pide su factura después de que su venta entró en la global: se cancela la global con el motivo «04 Operación nominativa relacionada en la factura global», se hace la del cliente y se emite otra vez la global sin esa venta. Con la global mensual, una factura pedida dentro del mes no toca la global.
 
