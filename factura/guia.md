@@ -12,7 +12,7 @@ Mi negocio es [nombre y ciudad]. Lee https://anotado.ai/factura/guia y ayúdame 
 
 El dueño usa su WhatsApp de siempre y te usa a ti en su celular o su computadora. Anotado.AI no recibe ni guarda constancias, tickets ni facturas de nadie.
 
-Todo lo que dice esta guía sale de fuentes oficiales leídas el 25 de noviembre de 2026; las ligas están al final.
+Todo lo que dice esta guía sale de fuentes oficiales y de pruebas con Facturapi del 25 y 26 de noviembre de 2026; las ligas están al final.
 
 ## Cómo trabajar con el dueño
 
@@ -135,6 +135,7 @@ En abarrotes no hay una clave para todo: cada producto lleva la suya. La clave 0
 | Giro | IVA |
 |---|---|
 | Panadería: pan, pan dulce, pasteles y galletas para llevar | 0% |
+| Panadería: café, jugos, refrescos y otras bebidas que no sean leche; tortas y sándwiches | 16% |
 | Panadería con mesas y servicio, cafetería | 16% |
 | Restaurante, fonda, comida para llevar o a domicilio | 16% |
 | Taller mecánico: refacciones y mano de obra | 16% |
@@ -143,7 +144,7 @@ En abarrotes no hay una clave para todo: cada producto lleva la suya. La clave 0
 
 En la región fronteriza norte y sur, el IVA de 16% baja a 8% con el estímulo vigente hasta el 31 de diciembre de 2026; lo que va a 0% sigue en 0%. Si el negocio vende pan en el mostrador y alguien lo come ahí sin mesas ni servicio, la norma no lo dice con todas sus letras: la regla práctica es «si hay mesas y servicio, 16%».
 
-El pan dulce y los pasteles pueden causar además IEPS de 8% para quien los hornea. En la factura a un cliente el IEPS no se desglosa ni se pregunta: va dentro del precio y la factura sale sin el impuesto por separado (Ley del IEPS, art. 19, fr. II). Solo va aparte si el cliente es contribuyente del IEPS por esos mismos bienes y lo pide. Por eso el producto se da de alta en el catálogo solo con su IVA. Si el dueño hornea, el IEPS es tema de su declaración, no de cada factura: díselo en una línea al dar de alta sus productos; su IA de confianza le hace la cuenta con sus números. La factura global sí separa el IEPS (sección 6).
+El pan dulce y los pasteles pueden causar además IEPS de 8% para quien los hornea. En la factura a un cliente el IEPS no se desglosa ni se pregunta: va dentro del precio y la factura sale sin el impuesto por separado (Ley del IEPS, art. 19, fr. II). Solo va aparte si el cliente es contribuyente del IEPS por esos mismos bienes y lo pide. Por eso el producto se da de alta en el catálogo solo con su IVA. Si el dueño hornea, el IEPS es tema de su declaración, no de cada factura: díselo en una línea al dar de alta sus productos y ofrécele hacer la cuenta con sus números. La factura global sí separa el IEPS (sección 6).
 
 ### Su aviso de privacidad
 
@@ -206,7 +207,7 @@ Va la forma en que de verdad le pagaron: registrar otra, o registrarla sin que e
 
 ### Los conceptos y el IVA
 
-Del ticket tomas cada concepto con su cantidad y su importe, y revisas que la suma dé el total. A cada concepto le pones su clave, su unidad y su IVA de la lista del negocio. Si un concepto no está en la lista, pregúntale al dueño cuál es.
+Del ticket tomas cada concepto con su cantidad y su importe, y revisas que la suma dé el total. A cada concepto le pones su clave, su unidad y su IVA de la lista del negocio. Si un concepto no está en la lista, propón su clave, su unidad y su IVA en el mismo resumen, para que el dueño conteste «sí» o lo corrija ahí; con su sí, timbra y da de alta el producto en el catálogo del proveedor.
 
 Los precios de mostrador ya traen el IVA. Para separarlo: base = precio ÷ 1.16 e IVA = precio − base. Un precio de $99.00 son $85.34 de base y $13.66 de IVA. Cada concepto admite hasta seis decimales y se redondea al final, no antes. Con tasa 0, el IVA es $0.00 y va en la factura como IVA a tasa 0.
 
@@ -214,7 +215,7 @@ En Facturapi el precio se manda con impuestos incluidos (`tax_included: true`, q
 
 ### Si el dueño está en RESICO y el cliente es empresa
 
-Si el dueño es persona física en RESICO (régimen 626) y el cliente es persona moral (RFC de 12 posiciones), la empresa le retiene ISR de 1.25% sobre el importe sin IVA, y la factura lleva esa retención (Ley del ISR, art. 113-J). Si la panadería del ejemplo estuviera en RESICO, ESCUELA KEMPER URGATE le retendría $4.40 de ISR sobre $352.00 y le pagaría $347.60. Con otro régimen del dueño, o con un cliente persona física, no hay esta retención.
+Si el dueño es persona física en RESICO (régimen 626) y el cliente es persona moral (RFC de 12 posiciones), la empresa le retiene ISR de 1.25% sobre el importe sin IVA, y la factura lleva esa retención (Ley del ISR, art. 113-J). Si la dueña de la panadería del ejemplo fuera persona física en RESICO, ESCUELA KEMPER URGATE le retendría $4.40 de ISR sobre $352.00 y le pagaría $347.60. Con otro régimen del dueño, o con un cliente persona física, no hay esta retención.
 
 En Facturapi, a cada concepto se le agrega en `taxes`, junto a su IVA, el impuesto `{ "type": "ISR", "rate": 0.0125, "withholding": true }`. Para que la retención salga sobre el importe sin IVA, en estas facturas manda el precio sin impuestos (`tax_included: false`) con la base que calculaste. La retención no va en el producto del catálogo, porque solo aplica a personas morales: en estas facturas manda cada concepto con sus datos completos en lugar del id del producto. Enséñale la retención al dueño en el resumen, antes de su sí, con el total que de verdad va a recibir.
 
@@ -227,15 +228,17 @@ Factura para ESCUELA KEMPER URGATE (EKU9003173C9), código postal 26015, régime
 Uso G03 Gastos en general · Pagó en efectivo (01) · PUE
 6 × Concha · 50181901 · Pieza · IVA 0% · $72.00
 1 × Pastel de tres leches · 50182001 · Pieza · IVA 0% · $280.00
-Total $352.00 · IVA $0.00
+Total $352.00 · IVA $0.00 · Factura real (producción)
 Si fue con tarjeta o transferencia, o el cliente pidió otro uso, dímelo. ¿La timbro?
 ```
 
+En modo de prueba, cambia «Factura real (producción)» por «Prueba, sin validez fiscal».
+
 Si lleva retención de ISR, el resumen la enseña antes de preguntar: «Retención de ISR 1.25% $4.40 · Total a recibir $347.60».
 
-Antes de timbrar, revisa en el proveedor si ese ticket ya tiene factura (mismo folio, cliente y total). Si ya la tiene, no la timbres otra vez: dale las ligas de la que existe.
+Antes de timbrar, revisa en el proveedor si ese ticket ya tiene factura (mismo folio, cliente y total). Si ya la tiene, no la timbres otra vez: dale las ligas de la que existe. Para poder encontrarla, pon siempre el número del ticket como folio de la factura (en Facturapi, `folio_number`), como en el ejemplo.
 
-Con su sí, timbra y dale el PDF y el XML. Si el proveedor te los da como ligas de descarga, como Facturapi, pide una liga para el PDF y otra para el XML, no el ZIP, para que el dueño abra cada archivo en el celular y lo reenvíe. Dile a qué hora vencen, en su hora local: duran una hora y Facturapi da la hora en UTC (en el centro del país son seis horas menos). Que abra cada liga, baje los dos archivos y se los reenvíe al cliente por WhatsApp como archivos, no la liga. No intentes bajarlos tú: en Claude con un conector propio siempre llegan como ligas, porque ahí Claude no puede pasarle archivos a la app conectada ni guardar los que ella genera. Si se le pasó la hora, pide ligas nuevas de la misma factura; no la timbres otra vez. La app gratuita del propio SAT dice que la factura se comparte por correo o WhatsApp. Si el cliente la quiere por correo, el proveedor se la manda con los dos archivos adjuntos, pero darle el correo es opcional para el cliente.
+Con su sí, timbra y dale el PDF y el XML. Si el proveedor te los da como ligas de descarga, como Facturapi, pide una liga para el PDF y otra para el XML, no el ZIP, para que el dueño abra cada archivo en el celular y lo reenvíe. Dile a qué hora vencen, en su hora local: duran una hora y Facturapi da la hora en UTC (en el centro del país son seis horas menos). Que abra cada liga, baje los dos archivos y se los reenvíe al cliente por WhatsApp como archivos, no la liga. Si no sabe cómo, dile: en el chat del cliente toca el clip o el «+», luego «Documento», y escoge los dos archivos en Descargas. No intentes bajarlos tú: en Claude con un conector propio siempre llegan como ligas, porque ahí Claude no puede pasarle archivos a la app conectada ni guardar los que ella genera. Si se le pasó la hora, pide ligas nuevas de la misma factura; no la timbres otra vez. La app gratuita del propio SAT dice que la factura se comparte por correo o WhatsApp. Si el cliente la quiere por correo, el proveedor se la manda con los dos archivos adjuntos, pero darle el correo es opcional para el cliente.
 
 Hay que hacer la factura dentro de las 24 horas siguientes a la venta. Si el cliente la pide después, igual se le hace: negarla porque no la pidió en el momento es práctica indebida.
 
@@ -354,7 +357,7 @@ Si el cliente paga después o en partes, la factura va con forma 99 y método PP
 
 - Si hay un error, se hace la factura buena relacionada con la mala (clave «04 Sustitución de los CFDI previos») y se cancela la mala con el motivo 01 (con errores, con relación).
 - Otros motivos: 02 con errores sin relación, 03 la operación no se llevó a cabo, 04 operación nominativa relacionada en la global.
-- El cliente tiene tres días para aceptar la cancelación; si no responde, se tiene por aceptada. No necesitan su aceptación las facturas de hasta $1,000, las globales y las que se cancelan dentro del día hábil siguiente.
+- El cliente tiene tres días hábiles para aceptar la cancelación. Si es la primera solicitud y no responde, se tiene por aceptada; si ya la rechazó una vez y no responde, no se cancela. No necesitan su aceptación las facturas de hasta $1,000, las globales y las que se cancelan dentro del día hábil siguiente.
 - Plazo: hasta el mes en que se presenta la declaración anual del año en que se emitió; para personas físicas, abril del año siguiente.
 - Quien cancela tiene que poder justificar el motivo con documentos.
 
