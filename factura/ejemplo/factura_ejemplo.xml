@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- EJEMPLO SIN VALIDEZ FISCAL. Factura de ejemplo de Anotado.AI con la estructura del CFDI 4.0: no está sellada ni timbrada, no tiene folio fiscal y no se mandó al SAT. El RFC del emisor es el genérico de los ejemplos del SAT. -->
+<cfdi:Comprobante xmlns:cfdi="http://www.sat.gob.mx/cfd/4" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.sat.gob.mx/cfd/4 http://www.sat.gob.mx/sitio_internet/cfd/4/cfdv40.xsd" Version="4.0" Serie="EJEMPLO" Folio="42" Fecha="2026-11-26T13:09:00" FormaPago="01" SubTotal="352.00" Moneda="MXN" Total="352.00" TipoDeComprobante="I" Exportacion="01" MetodoPago="PUE" LugarExpedicion="72000">
+  <cfdi:Emisor Rfc="AAA010101AAA" Nombre="PANADERIA SAN JOSE" RegimenFiscal="601"/>
+  <cfdi:Receptor Rfc="EKU9003173C9" Nombre="ESCUELA KEMPER URGATE" DomicilioFiscalReceptor="26015" RegimenFiscalReceptor="601" UsoCFDI="G03"/>
+  <cfdi:Conceptos>
+    <cfdi:Concepto ClaveProdServ="50181901" Cantidad="6" ClaveUnidad="H87" Unidad="Pieza" Descripcion="Concha" ValorUnitario="12.00" Importe="72.00" ObjetoImp="02">
+      <cfdi:Impuestos>
+        <cfdi:Traslados>
+          <cfdi:Traslado Base="72.00" Impuesto="002" TipoFactor="Tasa" TasaOCuota="0.000000" Importe="0.00"/>
+        </cfdi:Traslados>
+      </cfdi:Impuestos>
+    </cfdi:Concepto>
+    <cfdi:Concepto ClaveProdServ="50182001" Cantidad="1" ClaveUnidad="H87" Unidad="Pieza" Descripcion="Pastel de tres leches" ValorUnitario="280.00" Importe="280.00" ObjetoImp="02">
+      <cfdi:Impuestos>
+        <cfdi:Traslados>
+          <cfdi:Traslado Base="280.00" Impuesto="002" TipoFactor="Tasa" TasaOCuota="0.000000" Importe="0.00"/>
+        </cfdi:Traslados>
+      </cfdi:Impuestos>
+    </cfdi:Concepto>
+  </cfdi:Conceptos>
+  <cfdi:Impuestos TotalImpuestosTrasladados="0.00">
+    <cfdi:Traslados>
+      <cfdi:Traslado Base="352.00" Impuesto="002" TipoFactor="Tasa" TasaOCuota="0.000000" Importe="0.00"/>
+    </cfdi:Traslados>
+  </cfdi:Impuestos>
+</cfdi:Comprobante>
