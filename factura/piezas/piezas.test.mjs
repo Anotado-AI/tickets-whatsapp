@@ -4,7 +4,7 @@ import { buscarRfc, digitoVerificador, limpiarRfc, revisarRfc } from "./rfc.mjs"
 import { leerConstancia, leerRegimenes, quitarRegimenCapital } from "./constancia.mjs";
 import { leerTicket } from "./ticket.mjs";
 import { desglosar, desglosarConceptos } from "./iva.mjs";
-import { armarPedido, productoDe, usoPermitido, usosPara } from "./pedido.mjs";
+import { armarGlobal, armarPedido, periodicidadDe, productoDe, retieneIsrResico, usoPermitido, usosPara } from "./pedido.mjs";
 import { REGIMENES, USOS } from "./catalogos.mjs";
 import { leerPesos, normalizar, pesos } from "./texto.mjs";
 
@@ -279,3 +279,100 @@ test("pedido: público en general va con régimen 616 y uso S01, sin código pos
   assert.equal(pedido.use, "S01");
   assert.ok(!("address" in pedido.customer));
 });
+
+// Retención de ISR en RESICO (Ley del ISR, art. 113-J): persona física en 626 que le vende a una persona moral.
+const DUENO_RESICO = { rfc: "CACX7605101P8", regimen: "626" };
+const REFRESCO = { descripcion: "Refresco", clave: "50202306", unidad: "H87", iva: 0.16 };
+
+test("retención: el dueño en RESICO le vende a una empresa y le retienen $4.40 de ISR sobre $352", () => {
+  const t = leerTicket(TICKET);
+  const { pedido, errores, retencionIsr } = armarPedido({ cliente: CLIENTE, conceptos: t.conceptos, productos: PRODUCTOS, formaPago: "01", uso: "G03", folio: t.folio, emisor: DUENO_RESICO });
+  assert.deepEqual(errores, []);
+  assert.equal(retencionIsr, 440);
+  assert.equal(35200 - retencionIsr, 34760, "total a recibir $347.60");
+  for (const item of pedido.items) {
+    assert.equal(item.product.tax_included, false, "precio sin impuestos para que la retención salga sobre la base sin IVA");
+    assert.deepEqual(item.product.taxes, [{ type: "IVA", rate: 0 }, { type: "ISR", rate: 0.0125, withholding: true }]);
+  }
+  assert.deepEqual(pedido.items.map((i) => i.product.price), [12, 280]);
+});
+
+test("retención: con IVA de 16% la base es el precio sin IVA", () => {
+  const { pedido, retencionIsr } = armarPedido({
+    cliente: CLIENTE,
+    conceptos: [{ cantidad: 6000, descripcion: "Concha", importe: 7200 }, { cantidad: 1000, descripcion: "Refresco", importe: 2500 }],
+    productos: [...PRODUCTOS, REFRESCO],
+    formaPago: "01",
+    uso: "G03",
+    emisor: DUENO_RESICO,
+  });
+  assert.equal(pedido.items[1].product.price, 21.55, "$25.00 con IVA → $21.55 sin IVA");
+  assert.equal(retencionIsr, Math.round((7200 + 2155) * 0.0125));
+});
+
+test("retención: sin RESICO, a persona física o en RESICO de persona moral no hay retención", () => {
+  const t = leerTicket(TICKET);
+  const base = { cliente: CLIENTE, conceptos: t.conceptos, productos: PRODUCTOS, formaPago: "01", uso: "G03" };
+  const con612 = armarPedido({ ...base, emisor: { rfc: "CACX7605101P8", regimen: "612" } });
+  assert.equal(con612.retencionIsr, 0);
+  assert.ok(con612.pedido.items.every((i) => i.product.tax_included && i.product.taxes.length === 1));
+  assert.equal(armarPedido({ ...base, emisor: { rfc: "XIA190128J61", regimen: "626" } }).retencionIsr, 0, "RESICO de persona moral");
+  assert.equal(armarPedido({ ...base, emisor: { rfc: "XIA190128J61", regimen: "601" } }).retencionIsr, 0);
+  const aFisica = armarPedido({ ...base, cliente: { rfc: "CACX7605101P8", nombre: "XOCHILT CASAS CHAVEZ", codigoPostal: "36257", regimen: "612" }, emisor: { rfc: "FUNK671228PH6", regimen: "626" } });
+  assert.deepEqual(aFisica.errores, []);
+  assert.equal(aFisica.retencionIsr, 0, "a persona física no se retiene");
+  assert.equal(armarPedido(base).retencionIsr, 0, "sin datos del emisor");
+  assert.equal(retieneIsrResico(DUENO_RESICO, "XAXX010101000"), false);
+  const sinRfc = armarPedido({ ...base, emisor: { regimen: "626" } });
+  assert.equal(sinRfc.pedido, null);
+  assert.ok(sinRfc.errores.some((e) => e.includes("falta tu RFC")));
+});
+
+// Factura global: receptor PUBLICO EN GENERAL con el objeto `global` que exige Facturapi.
+const TICKETS_DEL_MES = [
+  { folio: 42, conceptos: [{ cantidad: 6000, descripcion: "Concha", importe: 7200 }, { cantidad: 1000, descripcion: "Pastel de tres leches", importe: 28000 }] },
+  { folio: 43, conceptos: [{ cantidad: 2000, descripcion: "Concha", importe: 2400 }, { cantidad: 1000, descripcion: "Refresco", importe: 2500 }] },
+];
+
+test("global: un concepto «Venta» por ticket y por tasa, con su folio y el objeto global", () => {
+  const { pedido, errores, total } = armarGlobal({ tickets: TICKETS_DEL_MES, productos: [...PRODUCTOS, REFRESCO], periodo: { periodicidad: "mensual", mes: "11", anio: 2026 }, formaPago: "01", emisor: { rfc: "XIA190128J61", regimen: "601", codigoPostal: "06010" } });
+  assert.deepEqual(errores, []);
+  assert.equal(total, 40100);
+  assert.deepEqual(pedido.customer, { legal_name: "PUBLICO EN GENERAL", tax_id: "XAXX010101000", tax_system: "616", address: { zip: "06010" } });
+  assert.equal(pedido.use, "S01");
+  assert.deepEqual(pedido.global, { periodicity: "month", months: "11", year: 2026 });
+  const venta = (sku, price, rate) => ({ quantity: 1, product: { description: "Venta", product_key: "01010101", unit_key: "ACT", price, tax_included: true, taxes: [{ type: "IVA", rate }], sku } });
+  assert.deepEqual(pedido.items, [venta("42", 352, 0), venta("43", 24, 0), venta("43", 25, 0.16)]);
+});
+
+test("global: en RESICO de persona física va el total del periodo por tasa", () => {
+  const { pedido } = armarGlobal({ tickets: TICKETS_DEL_MES, productos: [...PRODUCTOS, REFRESCO], periodo: { periodicidad: "04", mes: 11, anio: 2026 }, formaPago: "01", emisor: DUENO_RESICO });
+  assert.deepEqual(pedido.items.map((i) => [i.product.price, i.product.taxes[0].rate, "sku" in i.product]), [[376, 0, false], [25, 0.16, false]]);
+  assert.ok(!("address" in pedido.customer), "sin código postal del emisor, Facturapi pone el del lugar de expedición");
+});
+
+test("global: errores que frenan el envío", () => {
+  assert.equal(periodicidadDe("Quincenal").api, "fortnight");
+  assert.equal(periodicidadDe("two_months").clave, "05");
+  assert.equal(periodicidadDe("anual"), null);
+  const base = { tickets: TICKETS_DEL_MES, productos: [...PRODUCTOS, REFRESCO], periodo: { periodicidad: "mensual", mes: "11", anio: 2026 }, formaPago: "01" };
+  const casos = [
+    [{ periodo: { mes: "11", anio: 2026 } }, "periodicidad"],
+    [{ periodo: { periodicidad: "mensual", mes: "13", anio: 2026 } }, "de 01 a 12"],
+    [{ periodo: { periodicidad: "bimestral", mes: "11", anio: 2026 } }, "13 (enero y febrero)"],
+    [{ periodo: { periodicidad: "mensual", mes: "11", anio: 26 } }, "año"],
+    [{ formaPago: "99" }, "no puede ser 99"],
+    [{ tickets: [] }, "No hay tickets"],
+    [{ tickets: [{ conceptos: TICKETS_DEL_MES[0].conceptos }] }, "no trae folio"],
+    [{ tickets: [TICKETS_DEL_MES[0], TICKETS_DEL_MES[0]] }, "dos veces"],
+    [{ productos: PRODUCTOS }, "«Refresco» (ticket 43) no está en tus productos"],
+  ];
+  for (const [cambio, texto] of casos) {
+    const { pedido, errores } = armarGlobal({ ...base, ...cambio });
+    assert.equal(pedido, null, texto);
+    assert.ok(errores.some((e) => e.includes(texto)), `${texto}: ${errores.join(" | ")}`);
+  }
+  const directo = armarPedido({ cliente: { rfc: "XAXX010101000", nombre: "Público en general" }, conceptos: [{ cantidad: 1000, descripcion: "Concha", importe: 1200 }], productos: PRODUCTOS, formaPago: "01", uso: "S01" });
+  assert.ok(directo.errores.some((e) => e.includes("armarGlobal")), "la global no se arma como factura de un cliente");
+});
+

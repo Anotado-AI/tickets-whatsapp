@@ -15,15 +15,31 @@
 //   --salida       carpeta para el PDF y el XML (por defecto, la actual)
 //   --revisar      solo enseña el pedido, no factura
 //
+// Tus datos fiscales (RFC y régimen) los lee de Facturapi con tu llave. Si eres persona física en
+// RESICO (626) y el cliente es persona moral, la factura lleva la retención de ISR de 1.25% sobre el
+// importe sin IVA (Ley del ISR, art. 113-J) y el script te dice cuánto vas a recibir. Con --revisar y
+// sin llave, pásalos con --rfc-emisor y --regimen-emisor.
+//
+// Factura global de los tickets que nadie pidió facturar:
+//
+//   FACTURAPI_KEY=sk_test_… node facturar.mjs --global --tickets tickets/ --productos productos.json \
+//     --periodicidad mensual --mes 11 --anio 2026 --forma 01
+//
+//   --tickets       una carpeta con un .txt por ticket, o los archivos separados por comas
+//   --periodicidad  diaria, semanal, quincenal, mensual o bimestral
+//   --mes           01 a 12 (bimestral: 13 enero y febrero … 18 noviembre y diciembre)
+//   --anio          el año, con cuatro cifras
+//   --forma         la forma de pago que más se usó en el periodo
+//
 // Con una llave sk_test_ la factura es de prueba: no va al SAT. Con sk_live_ es real.
 // La llave va en la variable FACTURAPI_KEY; este script nunca la escribe en pantalla.
 
-import { readFile, writeFile, mkdir } from "node:fs/promises";
+import { readFile, writeFile, mkdir, readdir, stat } from "node:fs/promises";
 import { execFile } from "node:child_process";
 import path from "node:path";
 import { leerTicket } from "../piezas/ticket.mjs";
 import { leerConstancia } from "../piezas/constancia.mjs";
-import { armarPedido } from "../piezas/pedido.mjs";
+import { armarGlobal, armarPedido, periodicidadDe, TASA_RETENCION_RESICO } from "../piezas/pedido.mjs";
 import { pesos } from "../piezas/texto.mjs";
 
 const API = "https://www.facturapi.io/v2";
@@ -34,7 +50,7 @@ function opciones(argv) {
     const a = argv[i];
     if (!a.startsWith("--")) continue;
     const clave = a.slice(2);
-    if (clave === "revisar") o.revisar = true;
+    if (clave === "revisar" || clave === "global") o[clave] = true;
     else o[clave] = argv[++i];
   }
   return o;
@@ -66,8 +82,72 @@ async function api(ruta, llave, { metodo = "GET", cuerpo, formato = "json" } = {
   return formato === "json" ? r.json() : Buffer.from(await r.arrayBuffer());
 }
 
+// Tus datos fiscales: de Facturapi si hay llave; si no, de --rfc-emisor y --regimen-emisor.
+async function datosEmisor(o, llave) {
+  if (llave) {
+    const org = await api("/organizations/me", llave);
+    const legal = org.legal || {};
+    return { rfc: legal.tax_id || "", regimen: legal.tax_system || "", codigoPostal: (legal.address && legal.address.zip) || "", nombre: legal.legal_name || "" };
+  }
+  if (o["rfc-emisor"] || o["regimen-emisor"]) return { rfc: o["rfc-emisor"] || "", regimen: o["regimen-emisor"] || "" };
+  return null;
+}
+
+function leerLlave(o) {
+  const llave = (process.env.FACTURAPI_KEY || "").trim();
+  if (llave && !/^sk_(test|live)_/.test(llave)) throw new Error("La llave de FACTURAPI_KEY debe empezar con sk_test_ o sk_live_.");
+  if (!llave && !o.revisar) throw new Error("Pon tu llave de Facturapi en la variable FACTURAPI_KEY (empieza con sk_test_ o sk_live_).");
+  return llave;
+}
+
+async function timbrarYGuardar(pedido, llave, carpeta, nombre, correo) {
+  const factura = await api("/invoices", llave, { metodo: "POST", cuerpo: pedido });
+  await mkdir(carpeta, { recursive: true });
+  const pdf = await api(`/invoices/${factura.id}/pdf`, llave, { formato: "binario" });
+  const xml = await api(`/invoices/${factura.id}/xml`, llave, { formato: "binario" });
+  const base = `${nombre}_${factura.series || ""}${factura.folio_number || ""}`;
+  await writeFile(path.join(carpeta, base + ".pdf"), pdf);
+  await writeFile(path.join(carpeta, base + ".xml"), xml);
+  if (correo) await api(`/invoices/${factura.id}/email`, llave, { metodo: "POST", cuerpo: { email: correo } });
+  console.log(`Factura ${factura.livemode ? "real" : "de prueba"} lista. Folio fiscal: ${factura.uuid} · total ${pesos(Math.round(factura.total * 100))}`);
+  console.log(`Archivos: ${path.join(carpeta, base)}.pdf y .xml${correo ? ` · también se mandó a ${correo}` : ""}`);
+}
+
+async function rutasDeTickets(lista) {
+  const rutas = [];
+  for (const r of String(lista).split(",").map((x) => x.trim()).filter(Boolean)) {
+    if ((await stat(r)).isDirectory()) rutas.push(...(await readdir(r)).filter((a) => a.endsWith(".txt")).sort().map((a) => path.join(r, a)));
+    else rutas.push(r);
+  }
+  return rutas;
+}
+
+async function global(o) {
+  for (const falta of ["tickets", "productos", "periodicidad", "mes", "anio", "forma"]) {
+    if (!o[falta]) throw new Error(`Falta --${falta}. Corre el script sin datos para ver la ayuda al principio del archivo.`);
+  }
+  const tickets = [];
+  for (const ruta of await rutasDeTickets(o.tickets)) {
+    const t = leerTicket(await readFile(ruta, "utf8"));
+    if (!t.cuadra) throw new Error(`El ticket de ${ruta} no cuadra: los conceptos suman ${pesos(t.suma)} y el total dice ${t.total === null ? "nada" : pesos(t.total)}.`);
+    tickets.push(t);
+  }
+  const llave = leerLlave(o);
+  const emisor = await datosEmisor(o, llave);
+  const productos = JSON.parse(await readFile(o.productos, "utf8"));
+  const { pedido, errores, total } = armarGlobal({ tickets, productos, periodo: { periodicidad: o.periodicidad, mes: o.mes, anio: Number(o.anio) }, formaPago: o.forma, emisor });
+  if (errores.length) throw new Error("No se puede armar la global todavía:\n- " + errores.join("\n- "));
+  console.log(`Factura global a PUBLICO EN GENERAL · ${tickets.length} tickets · periodo ${periodicidadDe(pedido.global.periodicity).nombres[0]} ${pedido.global.months}/${pedido.global.year} · total ${pesos(total)}`);
+  if (o.revisar) {
+    console.log(JSON.stringify(pedido, null, 2));
+    return;
+  }
+  await timbrarYGuardar(pedido, llave, o.salida || ".", "factura_global", null);
+}
+
 async function main() {
   const o = opciones(process.argv.slice(2));
+  if (o.global) return global(o);
   for (const falta of ["ticket", "constancia", "productos", "forma", "uso"]) {
     if (!o[falta]) throw new Error(`Falta --${falta}. Corre el script sin datos para ver la ayuda al principio del archivo.`);
   }
@@ -83,38 +163,29 @@ async function main() {
     regimen = constancia.regimenes[0].clave;
   }
   const productos = JSON.parse(await readFile(o.productos, "utf8"));
-  const { pedido, errores } = armarPedido({
+  const llave = leerLlave(o);
+  const emisor = await datosEmisor(o, llave);
+  const { pedido, errores, retencionIsr } = armarPedido({
     cliente: { rfc: constancia.rfc, nombre: constancia.nombre, codigoPostal: constancia.codigoPostal, regimen, correo: o.correo },
     conceptos: ticket.conceptos,
     productos,
     formaPago: o.forma,
     uso: o.uso,
     folio: ticket.folio || undefined,
+    emisor,
   });
   if (errores.length) throw new Error("No se puede facturar todavía:\n- " + errores.join("\n- "));
   pedido.idempotency_key = `ticket-${ticket.folio}-${constancia.rfc}-${ticket.total}`.slice(0, 100);
 
   console.log(`Cliente: ${constancia.nombre} · RFC ${constancia.rfc} · CP ${constancia.codigoPostal} · régimen ${regimen}`);
   console.log(`Ticket ${ticket.folio}: ${ticket.conceptos.length} conceptos, total ${pesos(ticket.total)}`);
+  if (retencionIsr) console.log(`Retención de ISR ${TASA_RETENCION_RESICO * 100}% ${pesos(retencionIsr)} · Total a recibir ${pesos(ticket.total - retencionIsr)} (eres RESICO y el cliente es persona moral)`);
+  if (!emisor) console.log("Aviso: sin tu llave no sé tu régimen. Si eres persona física en RESICO (626) y el cliente es empresa, agrega --rfc-emisor y --regimen-emisor 626 para ver la retención de ISR.");
   if (o.revisar) {
     console.log(JSON.stringify(pedido, null, 2));
     return;
   }
-  const llave = (process.env.FACTURAPI_KEY || "").trim();
-  if (!/^sk_(test|live)_/.test(llave)) throw new Error("Pon tu llave de Facturapi en la variable FACTURAPI_KEY (empieza con sk_test_ o sk_live_).");
-
-  const factura = await api("/invoices", llave, { metodo: "POST", cuerpo: pedido });
-  const carpeta = o.salida || ".";
-  await mkdir(carpeta, { recursive: true });
-  const nombre = `factura_${factura.series || ""}${factura.folio_number || ticket.folio}_${constancia.rfc}`;
-  const pdf = await api(`/invoices/${factura.id}/pdf`, llave, { formato: "binario" });
-  const xml = await api(`/invoices/${factura.id}/xml`, llave, { formato: "binario" });
-  await writeFile(path.join(carpeta, nombre + ".pdf"), pdf);
-  await writeFile(path.join(carpeta, nombre + ".xml"), xml);
-  if (o.correo) await api(`/invoices/${factura.id}/email`, llave, { metodo: "POST", cuerpo: { email: o.correo } });
-
-  console.log(`Factura ${factura.livemode ? "real" : "de prueba"} lista. Folio fiscal: ${factura.uuid} · total ${pesos(Math.round(factura.total * 100))}`);
-  console.log(`Archivos: ${path.join(carpeta, nombre)}.pdf y .xml${o.correo ? ` · también se mandó a ${o.correo}` : ""}`);
+  await timbrarYGuardar(pedido, llave, o.salida || ".", `factura_${constancia.rfc}`, o.correo);
 }
 
 main().catch((e) => {

@@ -58,7 +58,7 @@ Precios leídos el 25 de noviembre de 2026 en el sitio de cada proveedor, con 20
 
 Facturapi cobra la Licencia API: $299 al mes más $0.60 por factura, IVA incluido, con el servidor MCP incluido sin costo adicional. Con 100 facturas al mes son $359; con 200, $419. Tiene 14 días para practicar con facturas de prueba, sin costo ni tarjeta. Varios negocios (varios RFC) caben en la misma licencia.
 
-El SAT no tiene conexión para IA. Tiene dos servicios gratuitos para facturar a mano: «Genera tu factura» en su portal y la app «Factura SAT Móvil», que acepta hasta 15 productos y servicios. Le sirven a quien hace pocas facturas al mes.
+El SAT no tiene conexión para IA. Tiene dos servicios gratuitos para facturar a mano: «Genera tu factura» en su portal y la app «Factura SAT Móvil», que acepta hasta 15 productos y servicios. Le sirven a quien hace pocas facturas al mes. La app pide la Contraseña y el sello digital vigente; la e.firma en lugar del sello solo sirve en «Genera tu factura».
 
 ## 3. Lo que se arma una vez
 
@@ -73,7 +73,7 @@ El dueño abre su cuenta en el sitio del proveedor (Facturapi: https://www.factu
 
 Para timbrar, el proveedor solo necesita el sello. La e.firma se usa en el alta, para firmar la Carta Manifiesto; la documentación de Facturapi no dice si la guarda después, así que no le asegures al dueño ni una cosa ni la otra. Si alguien le ayuda con sus facturas, esa persona puede subir el sello en la cuenta del negocio.
 
-Para practicar sin facturas reales, Facturapi tiene modo de prueba: con la llave que empieza con `sk_test_`, las facturas no van al SAT y no tienen validez fiscal. Las reales salen con la llave `sk_live_` y piden el sello digital.
+Para practicar sin facturas reales, Facturapi tiene modo de prueba: con la llave que empieza con `sk_test_`, las facturas no van al SAT y no tienen validez fiscal. Las reales salen con la llave `sk_live_` y piden el sello digital. En modo de prueba Facturapi no revisa los datos del cliente: acepta un nombre o un código postal que no son los de la constancia y hasta un RFC con el dígito verificador malo. Que una factura de prueba salga no prueba que los datos estén bien; revísalos tú contra la constancia.
 
 ### El sello digital
 
@@ -330,7 +330,7 @@ Lo que nadie pidió facturar va en una factura global del día, la semana o el m
 
 Pídele al dueño el registro completo de ventas del periodo y separa las que ya tienen factura individual. Con las restantes, prepara la global y enséñale el total y los impuestos antes de pedir su sí. Si las ventas ya están registradas como recibos abiertos en Facturapi, usa la función de factura global. Si no, crea la factura de ingreso a PUBLICO EN GENERAL con los datos del periodo y los conceptos correspondientes. No supongas que Facturapi tiene los tickets de WhatsApp.
 
-En Facturapi, la factura a PUBLICO EN GENERAL lleva el objeto `global` con la periodicidad, los meses y el año; sin él la rechaza. La global desde recibos es del plan de recibos y autofactura, no de la Licencia API.
+En Facturapi, la factura a PUBLICO EN GENERAL lleva el objeto `global` con la periodicidad (`day`, `week`, `fortnight`, `month` o `two_months`), el mes y el año, por ejemplo `"global": { "periodicity": "month", "months": "11", "year": 2026 }`. Su documentación lo hace obligatorio. En modo de prueba la timbra sin él, pero el XML sale sin la información global que pide el SAT: mándalo siempre. Cada ticket va como un concepto «Venta» con la clave 01010101, la unidad ACT y el folio del ticket en `sku`, que sale en el XML como número de identificación; si un ticket mezcla tasas de IVA, va un concepto por tasa con el mismo folio. La global desde recibos es del plan de recibos y autofactura, no de la Licencia API.
 
 - La global separa el IVA y, si el negocio lo causa, el IEPS.
 - En RESICO de personas físicas va solo el monto total de las operaciones del periodo.
@@ -379,14 +379,20 @@ El código está en `https://github.com/Anotado-AI/tickets-whatsapp`, carpeta `f
 - `piezas/constancia.mjs`: saca RFC, nombre, código postal y régimen del texto de una constancia.
 - `piezas/ticket.mjs`: lee los conceptos y el total del ticket de WhatsApp.
 - `piezas/iva.mjs`: separa la base y el IVA de un precio que ya los trae, sin perder un centavo.
-- `piezas/pedido.mjs`: arma y revisa el pedido para Facturapi antes de mandarlo.
+- `piezas/pedido.mjs`: arma y revisa el pedido para Facturapi antes de mandarlo, con la retención de ISR de RESICO, y arma la factura global.
 - `script/facturar.mjs`: factura por API con la llave del dueño, para meterlo en su sistema o en su agente de WhatsApp.
 
 ```
 FACTURAPI_KEY=sk_test_... node factura/script/facturar.mjs --ticket ticket.txt --constancia constancia.pdf --productos productos.json --forma 01 --uso G03
 ```
 
-Con `--revisar` solo enseña el pedido. El script nunca escribe la llave en pantalla.
+Con `--revisar` solo enseña el pedido. El script lee de Facturapi el RFC y el régimen del dueño: si es persona física en RESICO y el cliente es persona moral, agrega la retención de ISR y dice cuánto va a recibir. La factura global de los tickets que nadie pidió facturar, con un archivo de texto por ticket:
+
+```
+FACTURAPI_KEY=sk_test_... node factura/script/facturar.mjs --global --tickets tickets/ --productos productos.json --periodicidad mensual --mes 11 --anio 2026 --forma 01
+```
+
+El script nunca escribe la llave en pantalla.
 
 ## Lo que viene
 
