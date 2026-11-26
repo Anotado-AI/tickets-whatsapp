@@ -10,6 +10,8 @@
 //
 //   Gracias por tu compra.
 //
+//   ¿Necesitas factura? Mándanos tu constancia de situación fiscal o tu RFC, nombre, código postal y régimen.   (solo con factura)
+//
 //   🎁 Regalo para un amigo: 10% en su primera compra con el código AMIGO10.
 //   No hace falta calificarnos para usarlo.
 //
@@ -24,6 +26,7 @@ import { formatoCantidad, formatoFecha, formatoFolio, formatoPesos, leerCantidad
 
 export const LIMITE_DESCRIPCION = 60;
 export const AVISO_REGALO = "No hace falta calificarnos para usarlo.";
+export const PREGUNTA_FACTURA = "¿Necesitas factura? Mándanos tu constancia de situación fiscal o tu RFC, nombre, código postal y régimen.";
 
 // El regalo termina con punto, porque abajo sigue otra oración.
 export function conPunto(texto) {
@@ -103,8 +106,9 @@ export function renglonConcepto(c) {
  * @param {string} [datos.pie]    dirección, RFC u horario; va bajo el total
  * @param {string} [datos.regalo] regalo para un amigo; va solo si existe
  * @param {string} [datos.resena] liga para calificar en Google
+ * @param {boolean} [datos.factura] pregunta si necesita factura; va después del gracias
  */
-export function armarMensaje({ negocio, folio, fecha, conceptos, pie, regalo, resena }) {
+export function armarMensaje({ negocio, folio, fecha, conceptos, pie, regalo, resena, factura }) {
   const nombre = limpiarTexto(negocio, 40).replace(/\*/g, "");
   const lista = conceptosDelTicket(conceptos);
   const total = lista.reduce((suma, c) => suma + importeRenglon(c), 0);
@@ -116,6 +120,7 @@ export function armarMensaje({ negocio, folio, fecha, conceptos, pie, regalo, re
   const textoPie = limpiarTexto(pie, 120);
   if (textoPie) lineas.push(textoPie);
   lineas.push("", "Gracias por tu compra.");
+  if (factura === true) lineas.push("", PREGUNTA_FACTURA);
   const textoRegalo = limpiarTexto(regalo, 120);
   if (textoRegalo) lineas.push("", `🎁 Regalo para un amigo: ${conPunto(textoRegalo)}`, AVISO_REGALO);
   const liga = String(resena || "").trim();

@@ -1,0 +1,16 @@
+[
+  {
+    "descripcion": "Concha",
+    "clave": "50181901",
+    "unidad": "H87",
+    "nombreUnidad": "Pieza",
+    "iva": 0
+  },
+  {
+    "descripcion": "Pastel de tres leches",
+    "clave": "50182001",
+    "unidad": "H87",
+    "nombreUnidad": "Pieza",
+    "iva": 0
+  }
+]

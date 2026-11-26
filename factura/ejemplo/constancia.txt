@@ -1,0 +1,15 @@
+Constancia de situación fiscal (EJEMPLO)
+Ficha de ejemplo con datos de prueba para practicar la factura. No es un documento del SAT.
+
+Datos de identificación del contribuyente
+RFC: EKU9003173C9
+Denominación/Razón Social: ESCUELA KEMPER URGATE
+Régimen Capital: SOCIEDAD ANONIMA DE CAPITAL VARIABLE
+Estatus en el padrón: ACTIVO
+
+Datos del domicilio registrado
+Código Postal: 26015
+
+Regímenes:
+Régimen Fecha Inicio
+Régimen General de Ley Personas Morales 17/03/1990

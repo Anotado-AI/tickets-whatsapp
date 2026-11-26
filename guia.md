@@ -11,7 +11,8 @@ La app no guarda los teléfonos de los clientes ni manda nada después del ticke
 - **Ticket.** El negocio escribe la cantidad, el concepto y el precio de cada producto. La app suma el total, pone el folio y la fecha, y arma el mensaje. El botón «Mandar por WhatsApp» abre el chat del cliente con el ticket escrito. Sin número, WhatsApp deja elegir el contacto. También hay un botón «Copiar ticket». Si un precio o una cantidad no es un número, la app marca el campo, dice cuál corregir y no deja mandar el ticket. Después de mandarlo, el aviso trae «Volver a abrir» por si hace falta abrir otra vez el mismo ticket.
 - **QR.** Un código QR grande con la liga para calificar, para el cliente que no da su número.
 - **Mi meta.** El dueño escribe su calificación, sus reseñas, la calificación que quiere y el promedio que espera de sus reseñas nuevas. La app le estima cuántas reseñas le faltan.
-- **Ajustes.** Cambia el nombre, la liga, el regalo o el pie, y entrega la liga nueva.
+- **Factura.** Si el negocio factura, el ticket puede preguntar «¿Necesitas factura?». El cliente manda su constancia de situación fiscal o sus datos (RFC, nombre, código postal y régimen) y la IA del dueño hace la factura. Cómo se hace: https://anotado.ai/factura/guia
+- **Ajustes.** Cambia el nombre, la liga, el regalo, el pie o la pregunta de factura, y entrega la liga nueva.
 
 Así le llega el ticket al cliente:
 
@@ -35,6 +36,12 @@ https://g.page/r/XXXX/review
 
 Los asteriscos ponen el texto en negritas en WhatsApp.
 
+Con la pregunta de factura encendida (`f=1`), después de «Gracias por tu compra.» va un renglón vacío y luego:
+
+```
+¿Necesitas factura? Mándanos tu constancia de situación fiscal o tu RFC, nombre, código postal y régimen.
+```
+
 ## Cómo llevar la conversación
 
 La IA hace el trabajo y el dueño decide.
@@ -44,6 +51,7 @@ La IA hace el trabajo y el dueño decide.
    - **El nombre**, como lo conocen sus clientes y como aparece en su ficha de Google Maps.
    - **El regalo para un amigo**, tres opciones y una cuarta sin regalo. Es un beneficio para un amigo del cliente, por ejemplo «10% en su primera compra con el código AMIGO10» o «un café de cortesía en su primera visita». Va en todos los tickets, califiquen o no.
    - **El pie del ticket**: la dirección, el horario o las dos cosas. El RFC solo si el dueño lo da; no lo busques ni lo inventes.
+   - **La pregunta de factura**: sí o no. Si el negocio ya factura o quiere facturar, sí.
 3. Pídele al dueño su liga de reseñas. Abajo están los pasos para conseguirla y comprobarla.
 4. Arma la liga de la app y entrégala.
 
@@ -78,6 +86,7 @@ La app vive en `https://anotado.ai/tickets/app/`. Agrégale los datos del negoci
 | `r` | Liga para calificar en Google | Obligatoria para el renglón de reseña y el QR. Empieza con `https://`, sin espacios y hasta 500 caracteres |
 | `g` | Regalo para un amigo | Opcional. Hasta 120 caracteres |
 | `p` | Pie del ticket: dirección, RFC u horario | Opcional. Hasta 120 caracteres |
+| `f` | Pregunta de factura | Opcional. `f=1` agrega «¿Necesitas factura? Mándanos tu constancia de situación fiscal o tu RFC, nombre, código postal y régimen.» Sin `f`, el ticket no pregunta |
 | `l` | Lada del país | Opcional. Si no va, es 52, México |
 
 Codifica cada valor con `encodeURIComponent`, como en el código de abajo. La liga de reseñas también se codifica, porque lleva `:` y `/`. La liga terminada va en un solo renglón, sin espacios ni letras con acento. Un nombre, regalo o pie más largo que su límite se recorta. Si la liga de reseñas no sirve (no empieza con `https://`, lleva espacios o pasa de 500 caracteres), la app abre en Ajustes con un aviso para que el dueño la pegue otra vez.
@@ -90,6 +99,7 @@ const datos = {
   r: "https://g.page/r/XXXX/review",
   g: "10% en su primera compra con el código AMIGO10",
   p: "Av. Juárez 120, Puebla",
+  f: "1",
 };
 const liga = "https://anotado.ai/tickets/app/?" + Object.entries(datos)
   .filter(([, valor]) => valor)
@@ -148,13 +158,14 @@ function fechaTicket(d) {
 }
 
 // conceptos: [{ cantidad: 6000, descripcion: "Concha", unitario: 1200 }]
-function armarMensaje({ negocio, folio, fecha, conceptos, pie, regalo, resena }) {
+function armarMensaje({ negocio, folio, fecha, conceptos, pie, regalo, resena, factura }) {
   const importe = (c) => Math.round((c.cantidad * c.unitario) / 1000);
   const renglones = conceptos.map((c) => `${c.cantidad / 1000} × ${c.descripcion || "Consumo"}: ${pesos(importe(c))}`);
   const total = conceptos.reduce((suma, c) => suma + importe(c), 0);
   const lineas = [`*${negocio}*`, `Ticket ${String(folio).padStart(4, "0")} · ${fechaTicket(fecha)}`, "", ...renglones, `*Total: ${pesos(total)}*`];
   if (pie) lineas.push(pie);
   lineas.push("", "Gracias por tu compra.");
+  if (factura === true) lineas.push("", "¿Necesitas factura? Mándanos tu constancia de situación fiscal o tu RFC, nombre, código postal y régimen.");
   if (regalo) lineas.push("", `🎁 Regalo para un amigo: ${conPunto(regalo)}`, "No hace falta calificarnos para usarlo.");
   if (resena) lineas.push("", "¿Cómo te atendimos? Cuéntanos en Google Maps:", resena);
   return lineas.join("\n");
@@ -230,8 +241,12 @@ Reglas con el cliente:
 - La app no guarda su número ni le manda nada después del ticket.
 - Si pide no recibir mensajes, se respeta.
 
+## La factura
+
+Para facturar por WhatsApp: si el cliente manda su constancia o sus datos, la IA del dueño hace la factura con esos datos y el ticket, y le devuelve el PDF y el XML para mandárselos. La guía está en https://anotado.ai/factura/guia
+
 ## Lo que viene
 
-En las siguientes semanas, Anotado.AI publica cómo facturar por WhatsApp. Para recibirlo, suscríbete gratis en https://anotado.ai/suscribirse
+El próximo viernes, Anotado.AI publica cómo tener tu propia página y tu Perfil de Negocio de Google, para que Google te encuentre y te recomiende. Para recibirlo, suscríbete gratis en https://anotado.ai/suscribirse
 
-Guía de Anotado.AI, 20 de noviembre de 2026. Contacto: rafael@anotado.ai
+Guía de Anotado.AI, 20 de noviembre de 2026, con la factura del 27 de noviembre de 2026. Contacto: rafael@anotado.ai
