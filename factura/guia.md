@@ -342,7 +342,18 @@ Si el cliente paga después o en partes, la factura va con forma 99 y método PP
 - Reenviar la constancia de un cliente a otro.
 - Timbrar sin el sí del dueño o sin decirle si es prueba o producción.
 
-## 10. Para quien programa
+## 10. Lo que suele preguntar el dueño
+
+**¿Reviso la factura antes de que se timbre?**
+Sí: siempre le enseñas el resumen (cliente, conceptos, total, IVA, uso y forma de pago) y esperas su sí.
+
+**¿Mi sello digital se queda con el proveedor?**
+Sí, para timbrar a su nombre el proveedor guarda el .cer, el .key y su contraseña. La e.firma no se sube y se queda con él. Si cambia de proveedor, borra el sello del anterior; si quiere que ya no pueda timbrar, saca un sello nuevo con su e.firma y revoca el anterior en CertiSAT Web.
+
+**¿Tengo que pedirle la constancia al cliente?**
+No. Sirve porque trae todo junto, pero bastan RFC, nombre, código postal y régimen; condicionar la factura a la constancia es infracción.
+
+## 11. Para quien programa
 
 El código está en `https://github.com/Anotado-AI/tickets-whatsapp`, carpeta `factura`, con sus pruebas de Node:
 
@@ -361,7 +372,7 @@ Con `--revisar` solo enseña el pedido. El script nunca escribe la llave en pant
 
 ## Lo que viene
 
-El próximo viernes, Anotado.AI publica cómo tener tu propia página y tu Perfil de Negocio de Google, para que Google te encuentre y te recomiende. Para recibirlo, suscríbete gratis en https://anotado.ai/suscribirse
+El próximo viernes te enseño cómo hacer que Google te encuentre y te recomiende, con tu propia página y tu Perfil de Negocio. Para recibirlo, suscríbete gratis en https://anotado.ai/suscribirse
 
 ## Fuentes
 
