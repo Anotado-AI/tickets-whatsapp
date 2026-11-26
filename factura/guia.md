@@ -64,7 +64,7 @@ El dueño abre su cuenta en el sitio del proveedor (Facturapi: https://www.factu
 3. La Carta Manifiesto que autoriza al proveedor a timbrar sus facturas. Se firma en el panel.
 4. La Licencia API, para usar el servidor MCP.
 
-Para facturar, el proveedor solo necesita el sello. La e.firma no hace falta para facturar y se queda con el dueño.
+Para facturar, el proveedor solo necesita el sello. La e.firma no hace falta para facturar y se queda con el dueño. Si alguien le ayuda con sus facturas, esa persona puede subir el sello en la cuenta del negocio.
 
 Para practicar sin facturas reales, Facturapi tiene modo de prueba: con la llave que empieza con `sk_test_`, las facturas no van al SAT y no tienen validez fiscal. Las reales salen con la llave `sk_live_` y piden el sello digital.
 
