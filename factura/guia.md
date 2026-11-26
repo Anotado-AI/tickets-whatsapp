@@ -118,7 +118,7 @@ En Claude Code: `claude mcp add --transport http facturapi https://mcp.facturapi
 
 ### Sus productos
 
-Arma con el dueño la lista de lo que vende. Cada producto lleva su clave del SAT, su unidad y su IVA. Propón la clave y deja que la confirme con un número. Luego da de alta cada producto en el catálogo de productos del proveedor con su clave, su unidad y su IVA (0% para pan y pasteles de panadería), y úsalos desde ahí en cada factura. La lista que quede en esta conversación no pasa a un chat nuevo, y un producto sin tasa sale con IVA de 16%. Con Facturapi MCP se dan de alta con sus funciones de productos; en la factura, cada concepto puede llevar el id del producto guardado en lugar de sus datos.
+Arma con el dueño la lista de lo que vende. Cada producto lleva su clave del SAT, su unidad y su IVA. Propón la clave y deja que la confirme con un número. Luego da de alta cada producto en el catálogo de productos del proveedor con su clave, su unidad y su IVA (0% para pan y pasteles de panadería), y úsalos desde ahí en cada factura. Los impuestos de cada producto se deciden una vez, aquí, y no se vuelven a preguntar factura por factura. La lista que quede en esta conversación no pasa a un chat nuevo, y un producto sin tasa sale con IVA de 16%. Con Facturapi MCP se dan de alta con sus funciones de productos; en la factura, cada concepto puede llevar el id del producto guardado en lugar de sus datos.
 
 | Qué se vende | Clave de producto | Unidad |
 |---|---|---|
@@ -143,7 +143,7 @@ En abarrotes no hay una clave para todo: cada producto lleva la suya. La clave 0
 
 En la región fronteriza norte y sur, el IVA de 16% baja a 8% con el estímulo vigente hasta el 31 de diciembre de 2026; lo que va a 0% sigue en 0%. Si el negocio vende pan en el mostrador y alguien lo come ahí sin mesas ni servicio, la norma no lo dice con todas sus letras: la regla práctica es «si hay mesas y servicio, 16%».
 
-El pan dulce y los pasteles pueden causar además IEPS de 8% para quien los hornea. En la venta al consumidor, el IEPS va dentro del precio. Si el comprador también es contribuyente del IEPS por esos bienes y pide el desglose, se traslada por separado. Si el dueño hornea, explícale que es tema de su declaración y que su IA de confianza le puede hacer la cuenta con sus números.
+El pan dulce y los pasteles pueden causar además IEPS de 8% para quien los hornea. En la factura a un cliente el IEPS no se desglosa ni se pregunta: va dentro del precio y la factura sale sin el impuesto por separado (Ley del IEPS, art. 19, fr. II). Solo va aparte si el cliente es contribuyente del IEPS por esos mismos bienes y lo pide. Por eso el producto se da de alta en el catálogo solo con su IVA. Si el dueño hornea, el IEPS es tema de su declaración, no de cada factura: díselo en una línea al dar de alta sus productos; su IA de confianza le hace la cuenta con sus números. La factura global sí separa el IEPS (sección 6).
 
 ### Su aviso de privacidad
 
@@ -192,7 +192,7 @@ La constancia es cómoda, pero no se puede exigir: para facturar bastan RFC, nom
 | Negocio o profesionista que compra para su actividad (régimen 601, 603, 606, 612, 620, 621, 622, 623, 624, 625 o 626) | G03 Gastos en general, o G01 Adquisición de mercancías si compra para revender |
 | Persona que solo tiene sueldo (605) o que no tiene actividad (616) | S01 Sin efectos fiscales |
 
-Con 605 o 616 no se acepta G03. Pregúntale al dueño el uso la primera vez; si el cliente pidió otro, usa el que pidió.
+Con 605 o 616 no se acepta G03. Si el cliente no dijo el uso, no lo preguntes aparte: propón en el resumen el de la tabla para su régimen (G03 si es negocio, S01 si solo tiene sueldo o no tiene actividad) y el dueño lo cambia en la misma respuesta si el cliente pidió otro. Si el cliente pidió uno que su régimen acepta, usa ese.
 
 | Cómo pagó | Forma de pago | Método |
 |---|---|---|
@@ -202,7 +202,7 @@ Con 605 o 616 no se acepta G03. Pregúntale al dueño el uso la primera vez; si 
 | Tarjeta de débito | 28 | PUE |
 | Paga después o en partes | 99 Por definir | PPD |
 
-Va la forma en que de verdad le pagaron. Si pagó con dos formas, la de mayor monto.
+Va la forma en que de verdad le pagaron: registrar otra, o registrarla sin que esté pagada, es una práctica indebida según el SAT. Si el ticket no dice cómo pagó, no hagas una pregunta aparte: ponla en el resumen como propuesta, por ejemplo «Pagó en efectivo (si fue con tarjeta o transferencia, dímelo)», y el dueño la corrige en la misma respuesta. Si pagó con dos formas, la de mayor monto.
 
 ### Los conceptos y el IVA
 
@@ -220,19 +220,22 @@ En Facturapi, a cada concepto se le agrega en `taxes`, junto a su IVA, el impues
 
 ### Resumen, timbre y entrega
 
-Enséñale al dueño un resumen y espera su sí:
+Enséñale al dueño un resumen y espera su sí. Lo que nadie dijo (la forma de pago, el uso) va como propuesta en el mismo resumen, para que el dueño conteste «sí» o lo corrija en la misma respuesta. No hagas preguntas aparte por la forma de pago, el uso ni el IEPS:
 
 ```
 Factura para ESCUELA KEMPER URGATE (EKU9003173C9), código postal 26015, régimen 601
-Uso G03 Gastos en general · efectivo (01) · PUE
+Uso G03 Gastos en general · Pagó en efectivo (01) · PUE
 6 × Concha · 50181901 · Pieza · IVA 0% · $72.00
 1 × Pastel de tres leches · 50182001 · Pieza · IVA 0% · $280.00
-Total $352.00 · IVA $0.00 · ¿La timbro?
+Total $352.00 · IVA $0.00
+Si fue con tarjeta o transferencia, o el cliente pidió otro uso, dímelo. ¿La timbro?
 ```
 
 Si lleva retención de ISR, el resumen la enseña antes de preguntar: «Retención de ISR 1.25% $4.40 · Total a recibir $347.60».
 
-Con su sí, timbra y dale el PDF y el XML. Si el proveedor te los da como ligas de descarga, como Facturapi, avísale al dueño que vencen en una hora: que abra cada liga, baje los dos archivos y se los reenvíe al cliente por WhatsApp como archivos, no la liga. En Claude con un conector propio siempre llegan como ligas, porque ahí Claude no puede pasarle archivos a la app conectada ni guardar los que ella genera. Si se le pasó la hora, pide ligas nuevas de la misma factura; no la timbres otra vez. La app gratuita del propio SAT dice que la factura se comparte por correo o WhatsApp. Si el cliente la quiere por correo, el proveedor se la manda con los dos archivos adjuntos, pero darle el correo es opcional para el cliente.
+Antes de timbrar, revisa en el proveedor si ese ticket ya tiene factura (mismo folio, cliente y total). Si ya la tiene, no la timbres otra vez: dale las ligas de la que existe.
+
+Con su sí, timbra y dale el PDF y el XML. Si el proveedor te los da como ligas de descarga, como Facturapi, pide una liga para el PDF y otra para el XML, no el ZIP, para que el dueño abra cada archivo en el celular y lo reenvíe. Dile a qué hora vencen, en su hora local: duran una hora y Facturapi da la hora en UTC (en el centro del país son seis horas menos). Que abra cada liga, baje los dos archivos y se los reenvíe al cliente por WhatsApp como archivos, no la liga. No intentes bajarlos tú: en Claude con un conector propio siempre llegan como ligas, porque ahí Claude no puede pasarle archivos a la app conectada ni guardar los que ella genera. Si se le pasó la hora, pide ligas nuevas de la misma factura; no la timbres otra vez. La app gratuita del propio SAT dice que la factura se comparte por correo o WhatsApp. Si el cliente la quiere por correo, el proveedor se la manda con los dos archivos adjuntos, pero darle el correo es opcional para el cliente.
 
 Hay que hacer la factura dentro de las 24 horas siguientes a la venta. Si el cliente la pide después, igual se le hace: negarla porque no la pidió en el momento es práctica indebida.
 
