@@ -247,6 +247,6 @@ Para facturar por WhatsApp: si el cliente manda su constancia o sus datos, la IA
 
 ## Lo que viene
 
-El próximo viernes, Anotado.AI publica cómo tener tu propia página y tu Perfil de Negocio de Google, para que Google te encuentre y te recomiende. Para recibirlo, suscríbete gratis en https://anotado.ai/suscribirse
+El próximo viernes, Anotado.AI publica cómo cobrar por WhatsApp con una liga de pago y facturar en cuanto te pagan. Para recibirlo, suscríbete gratis en https://anotado.ai/suscribirse
 
 Guía de Anotado.AI, 20 de noviembre de 2026, con la factura del 27 de noviembre de 2026. Contacto: rafael@anotado.ai

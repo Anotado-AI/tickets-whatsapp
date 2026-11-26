@@ -390,7 +390,7 @@ Con `--revisar` solo enseña el pedido. El script nunca escribe la llave en pant
 
 ## Lo que viene
 
-El próximo viernes te enseño cómo hacer que Google te encuentre y te recomiende, con tu propia página y tu Perfil de Negocio. Para recibirlo, suscríbete gratis en https://anotado.ai/suscribirse
+El próximo viernes te enseño a cobrar por WhatsApp con una liga de pago y a facturar en cuanto te pagan. Para recibirlo, suscríbete gratis en https://anotado.ai/suscribirse
 
 ## Fuentes
 
