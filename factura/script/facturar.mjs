@@ -29,7 +29,7 @@
 //   --periodicidad  diaria, semanal, quincenal, mensual o bimestral
 //   --mes           01 a 12 (bimestral: 13 enero y febrero … 18 noviembre y diciembre)
 //   --anio          el año, con cuatro cifras
-//   --forma         la forma de pago del ticket de mayor importe del periodo (si hay empate, una de las empatadas)
+//   --forma         la forma de pago del ticket de mayor importe de los que van en la global (si hay empate, una de las empatadas)
 //
 // Con una llave sk_test_ la factura es de prueba: no va al SAT. Con sk_live_ es real.
 // La llave va en la variable FACTURAPI_KEY; este script nunca la escribe en pantalla.

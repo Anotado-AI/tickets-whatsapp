@@ -142,7 +142,7 @@ En abarrotes no hay una clave para todo: cada producto lleva la suya. La clave 0
 | Abarrotes: frijol, arroz, leche, huevo, tortilla, pan y medicinas de patente | 0% |
 | Abarrotes: refrescos, jugos, agua en envase menor de 10 litros, chicles, alimento para mascotas, limpieza | 16% |
 
-Para usar IVA de 8% en lugar de 16%, revisa que el negocio cumpla los requisitos del estímulo y haya presentado el aviso al SAT: el local y la entrega de los bienes o la prestación del servicio deben estar en la región fronteriza norte o sur. El estímulo está vigente hasta el 31 de diciembre de 2026. Lo que va a 0% sigue en 0%. Resuelve esto una sola vez al dar de alta el negocio. Si el negocio vende pan en el mostrador y alguien lo come ahí sin mesas ni servicio, la norma no lo dice con todas sus letras: la regla práctica es «si hay mesas y servicio, 16%».
+Para usar IVA de 8% en lugar de 16%, revisa que el negocio cumpla los requisitos del estímulo y haya presentado el aviso al SAT: el local y la entrega de los bienes o la prestación del servicio deben estar en la región fronteriza norte o sur. El estímulo está vigente hasta el 31 de diciembre de 2026. Lo que va a 0% sigue en 0%. Resuélvelo al dar de alta el negocio. Desde el 1 de enero de 2027, antes de usar 8%, revisa en el DOF si el estímulo se prorrogó; si no, cambia esos productos a 16% en el catálogo del proveedor. Si el negocio vende pan en el mostrador y alguien lo come ahí sin mesas ni servicio, la norma no lo dice con todas sus letras: la regla práctica es «si hay mesas y servicio, 16%».
 
 El pan dulce y los pasteles pueden causar además IEPS de 8% para quien los hornea. En la factura a un cliente el IEPS no se desglosa ni se pregunta: va dentro del precio y la factura sale sin el impuesto por separado (Ley del IEPS, art. 19, fr. II). Solo va aparte si el cliente es contribuyente del IEPS por esos mismos bienes y lo pide. Por eso el producto se da de alta en el catálogo solo con su IVA. Si el dueño hornea, el IEPS es tema de su declaración, no de cada factura: díselo en una línea al dar de alta sus productos y ofrécele hacer la cuenta con sus números. La factura global sí separa el IEPS (sección 6).
 
@@ -209,7 +209,7 @@ Va la forma en que de verdad le pagaron: registrar otra, o registrarla sin que e
 
 Del ticket tomas cada concepto con su cantidad y su importe, y revisas que la suma dé el total. A cada concepto le pones su clave, su unidad y su IVA de la lista del negocio. Si un concepto no está en la lista, propón su clave, su unidad y su IVA en el mismo resumen, para que el dueño conteste «sí» o lo corrija ahí; con su sí, timbra y da de alta el producto en el catálogo del proveedor.
 
-Los precios de mostrador ya traen el IVA. Para separarlo: base = precio ÷ 1.16 e IVA = precio − base. Un precio de $99.00 son $85.34 de base y $13.66 de IVA. Cada concepto admite hasta seis decimales y se redondea al final, no antes. Con tasa 0, el IVA es $0.00 y va en la factura como IVA a tasa 0.
+Los precios de mostrador ya traen el IVA. Para separarlo: base = precio ÷ 1.16 e IVA = precio − base; con el 8% de la frontera, base = precio ÷ 1.08. Un precio de $99.00 son $85.34 de base y $13.66 de IVA. Cada concepto admite hasta seis decimales y se redondea al final, no antes. Con tasa 0, el IVA es $0.00 y va en la factura como IVA a tasa 0.
 
 En Facturapi el precio se manda con impuestos incluidos (`tax_included: true`, que es lo normal) y la tasa de cada concepto en `taxes`. Si no mandas `taxes`, Facturapi pone IVA de 16%: para pan y pasteles manda la tasa 0 de forma explícita.
 
@@ -357,7 +357,7 @@ Si el cliente paga después o en partes, la factura va con forma 99 y método PP
 
 - Si hay un error, se hace la factura buena relacionada con la mala (clave «04 Sustitución de los CFDI previos») y se cancela la mala con el motivo 01 (con errores, con relación).
 - Otros motivos: 02 con errores sin relación, 03 la operación no se llevó a cabo, 04 operación nominativa relacionada en la global.
-- El cliente tiene tres días hábiles para aceptar o rechazar la cancelación. Si es la primera solicitud y no responde, se acepta; si ya rechazó una y no responde a las siguientes, la factura sigue vigente. Revisa en el proveedor o en el SAT que el estado sea «Cancelada». En una factura de venta como la del ejemplo no hace falta su aceptación si el total es de hasta $1,000, si es global o si la cancelas dentro del día hábil siguiente. La excepción de $1,000 no aplica al complemento de pagos.
+- El cliente tiene tres días hábiles para aceptar o rechazar la cancelación. Si es la primera solicitud y no responde, se acepta; si ya rechazó una y no responde a las siguientes, la factura sigue vigente. Revisa en el proveedor o en el SAT que ya aparezca como cancelada; en Facturapi, `status` cambia a `canceled`, y `cancellation_status: "pending"` quiere decir que el cliente todavía no contesta. En una factura de venta como la del ejemplo no hace falta su aceptación si el total es de hasta $1,000, si es global o si la cancelas dentro del día hábil siguiente. La excepción de $1,000 no aplica al complemento de pagos.
 - Plazo: hasta el mes en que se presenta la declaración anual del año en que se emitió; para personas físicas, abril del año siguiente.
 - Quien cancela tiene que poder justificar el motivo con documentos.
 
