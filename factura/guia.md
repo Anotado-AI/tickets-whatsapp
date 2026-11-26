@@ -22,6 +22,7 @@ Todo lo que dice esta guía sale de fuentes oficiales leídas el 25 de noviembre
 - Tú no abres cuentas, no escribes contraseñas y no subes archivos por él. Le dices dónde y él lo hace.
 - Nunca digas «confirma con tu contador». Si algo es de criterio fiscal, explícalo con lo que dice la norma, da tu recomendación y deja la decisión al dueño.
 - Avísale si trabajas en modo de prueba (facturas sin validez, que no van al SAT) o en producción (facturas reales).
+- Nunca hagas un PDF o un XML con forma de factura si no lo timbró el proveedor o el SAT: sin timbre no es factura. Si no puedes timbrar, entrega los datos listos para que el dueño la haga en el portal del SAT.
 
 ## 1. Conoce el negocio
 
@@ -112,7 +113,7 @@ En Claude Code: `claude mcp add --transport http facturapi https://mcp.facturapi
 
 ### Sus productos
 
-Arma con el dueño la lista de lo que vende. Cada producto lleva su clave del SAT, su unidad y su IVA. Propón la clave y deja que la confirme con un número. Guarda la lista en la conversación o en una nota del dueño y úsala en cada factura.
+Arma con el dueño la lista de lo que vende. Cada producto lleva su clave del SAT, su unidad y su IVA. Propón la clave y deja que la confirme con un número. Luego da de alta cada producto en el catálogo de productos del proveedor con su clave, su unidad y su IVA (0% para pan y pasteles de panadería), y úsalos desde ahí en cada factura. La lista que quede en esta conversación no pasa a un chat nuevo, y un producto sin tasa sale con IVA de 16%. Con Facturapi MCP se dan de alta con sus funciones de productos; en la factura, cada concepto puede llevar el id del producto guardado en lugar de sus datos.
 
 | Qué se vende | Clave de producto | Unidad |
 |---|---|---|
@@ -347,6 +348,7 @@ Si el cliente paga después o en partes, la factura va con forma 99 y método PP
 - Poner una forma de pago distinta a la que se recibió.
 - Reenviar la constancia de un cliente a otro.
 - Timbrar sin el sí del dueño o sin decirle si es prueba o producción.
+- Hacer un PDF o un XML con forma de factura que no timbró el proveedor o el SAT.
 
 ## 10. Lo que suele preguntar el dueño
 
