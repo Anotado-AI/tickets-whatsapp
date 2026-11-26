@@ -30,7 +30,7 @@ Si el dueño te dio el nombre y la ciudad del negocio, búscalo en la web. Luego
 
 1. Qué vende y si tiene mesas y servicio (cambia el IVA, sección 3).
 2. Si ya factura y con qué proveedor o sistema.
-3. Su régimen fiscal y si tiene sello digital (sección 3).
+3. Su régimen fiscal y si tiene sello digital (sección 3). Si está en RESICO, sus facturas a empresas llevan retención de ISR (sección 4).
 4. Qué IA usa: Claude o ChatGPT, y con qué plan (sección 3).
 
 Con eso escoges el camino:
@@ -68,10 +68,10 @@ El dueño abre su cuenta en el sitio del proveedor (Facturapi: https://www.factu
 
 1. Los datos fiscales del negocio: RFC, nombre o razón social, régimen y el código postal del local, que es el lugar de expedición de sus facturas.
 2. El sello digital: el archivo .cer, el archivo .key y la contraseña de la llave privada, en Configuración, Certificados.
-3. La Carta Manifiesto que autoriza al proveedor a timbrar sus facturas. Se firma en el panel.
+3. La Carta Manifiesto que autoriza al proveedor a timbrar sus facturas. Se firma en el panel con la e.firma del dueño: su archivo .cer, su archivo .key y la contraseña de esa llave.
 4. La Licencia API, para usar el servidor MCP.
 
-Para facturar, el proveedor solo necesita el sello. La e.firma no hace falta para facturar y se queda con el dueño. Si alguien le ayuda con sus facturas, esa persona puede subir el sello en la cuenta del negocio.
+Para timbrar, el proveedor solo necesita el sello. La e.firma se usa en el alta, para firmar la Carta Manifiesto; la documentación de Facturapi no dice si la guarda después, así que no le asegures al dueño ni una cosa ni la otra. Si alguien le ayuda con sus facturas, esa persona puede subir el sello en la cuenta del negocio.
 
 Para practicar sin facturas reales, Facturapi tiene modo de prueba: con la llave que empieza con `sk_test_`, las facturas no van al SAT y no tienen validez fiscal. Las reales salen con la llave `sk_live_` y piden el sello digital.
 
@@ -207,6 +207,12 @@ Los precios de mostrador ya traen el IVA. Para separarlo: base = precio ÷ 1.16 
 
 En Facturapi el precio se manda con impuestos incluidos (`tax_included: true`, que es lo normal) y la tasa de cada concepto en `taxes`. Si no mandas `taxes`, Facturapi pone IVA de 16%: para pan y pasteles manda la tasa 0 de forma explícita.
 
+### Si el dueño está en RESICO y el cliente es empresa
+
+Si el dueño es persona física en RESICO (régimen 626) y el cliente es persona moral (RFC de 12 posiciones), la empresa le retiene ISR de 1.25% sobre el importe sin IVA, y la factura lleva esa retención (Ley del ISR, art. 113-J). Si la panadería del ejemplo estuviera en RESICO, ESCUELA KEMPER URGATE le retendría $4.40 de ISR sobre $352.00 y le pagaría $347.60. Con otro régimen del dueño, o con un cliente persona física, no hay esta retención.
+
+En Facturapi, a cada concepto se le agrega en `taxes`, junto a su IVA, el impuesto `{ "type": "ISR", "rate": 0.0125, "withholding": true }`. Para que la retención salga sobre el importe sin IVA, en estas facturas manda el precio sin impuestos (`tax_included: false`) con la base que calculaste. La retención no va en el producto del catálogo, porque solo aplica a personas morales: en estas facturas manda cada concepto con sus datos completos en lugar del id del producto. Enséñale la retención al dueño en el resumen, antes de su sí, con el total que de verdad va a recibir.
+
 ### Resumen, timbre y entrega
 
 Enséñale al dueño un resumen y espera su sí:
@@ -218,6 +224,8 @@ Uso G03 Gastos en general · efectivo (01) · PUE
 1 × Pastel de tres leches · 50182001 · Pieza · IVA 0% · $280.00
 Total $352.00 · IVA $0.00 · ¿La timbro?
 ```
+
+Si lleva retención de ISR, el resumen la enseña antes de preguntar: «Retención de ISR 1.25% $4.40 · Total a recibir $347.60».
 
 Con su sí, timbra y dale el PDF y el XML. El dueño se los reenvía al cliente por WhatsApp; la app gratuita del propio SAT dice que la factura se comparte por correo o WhatsApp. Si el cliente la quiere por correo, el proveedor se la manda con los dos archivos adjuntos, pero darle el correo es opcional para el cliente.
 
@@ -358,7 +366,7 @@ Si el cliente paga después o en partes, la factura va con forma 99 y método PP
 Sí: siempre le enseñas el resumen (cliente, conceptos, total, IVA, uso y forma de pago) y esperas su sí.
 
 **¿Mi sello digital se queda con el proveedor?**
-Sí, para timbrar a su nombre el proveedor guarda el .cer, el .key y su contraseña. La e.firma no se sube y se queda con él. Si cambia de proveedor, borra el sello del anterior; si quiere que ya no pueda timbrar, saca un sello nuevo con su e.firma y revoca el anterior en CertiSAT Web.
+Sí, para timbrar a su nombre el proveedor guarda el .cer, el .key y la contraseña del sello. La e.firma se usa en el alta para firmar la Carta Manifiesto que lo autoriza a timbrar; para timbrar no la necesita. Si cambia de proveedor, borra el sello del anterior; si quiere que ya no pueda timbrar, saca un sello nuevo con su e.firma y revoca el anterior en CertiSAT Web.
 
 **¿Tengo que pedirle la constancia al cliente?**
 No. Sirve porque trae todo junto, pero bastan RFC, nombre, código postal y régimen; condicionar la factura a la constancia es infracción.
@@ -397,6 +405,8 @@ El próximo viernes te enseño cómo hacer que Google te encuentre y te recomien
 - Cancelación: https://www.sat.gob.mx/minisitio/Factura/documentos/PreguntasFrecuentes_CancelacionFactura25082026.pdf
 - IVA: Ley del IVA, https://www.diputados.gob.mx/LeyesBiblio/pdf/LIVA.pdf, y su Reglamento, art. 10-A, https://www.diputados.gob.mx/LeyesBiblio/regley/Reg_LIVA_250914.pdf
 - IEPS: https://www.diputados.gob.mx/LeyesBiblio/pdf/LIEPS.pdf
+- Retención de ISR en RESICO: Ley del ISR, art. 113-J, https://www.diputados.gob.mx/LeyesBiblio/pdf/LISR.pdf
+- Carta Manifiesto y e.firma en Facturapi: https://docs.facturapi.io/docs/getting-started/organization-onboarding/
 - Datos personales: https://www.diputados.gob.mx/LeyesBiblio/pdf/LFPDPPP.pdf
 - Facturapi MCP: https://docs.facturapi.io/docs/guides/mcp-server/; API: https://docs.facturapi.io/api/; precios: https://www.facturapi.io/pricing
 - Conectores de Claude: https://support.claude.com/en/articles/11175166-get-started-with-custom-connectors-using-remote-mcp
