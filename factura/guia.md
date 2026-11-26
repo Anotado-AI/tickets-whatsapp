@@ -51,10 +51,10 @@ Precios leídos el 25 de noviembre de 2026 en el sitio de cada proveedor, con 20
 | Proveedor | Conexión con la IA | 200 facturas al mes | Precios |
 |---|---|---|---|
 | Facturapi | Servidor MCP oficial que emite facturas, con inicio de sesión o con llave | $419, IVA incluido | https://www.facturapi.io/pricing |
-| Fiscalapi | Servidor MCP, que según su sitio no funciona en ChatGPT ni en los conectores de claude.ai | $435.64, IVA incluido | https://www.fiscalapi.com/precios |
+| Fiscalapi | Servidor MCP, que según su sitio no funciona en ChatGPT ni en los conectores de claude.ai | $435.64 mensuales equivalentes: $199 al mes y prepago de 1,000 timbres por $1,183.20; IVA incluido | https://www.fiscalapi.com/precios |
 | Gigstack | Servidor MCP para ChatGPT, Claude y Cursor | $665.84, IVA incluido | https://www.gigstack.io/precios |
 | Alegra | Servidor MCP de consulta: no emite facturas | $249 al mes más IVA, facturas ilimitadas | https://www.alegra.com/mexico/precios/ |
-| Facturama | Sin servidor MCP propio; tiene API | Unos $238 al mes, IVA incluido | https://facturama.mx/api-facturacion-electronica |
+| Facturama | Sin servidor MCP propio; tiene API | $237.50 mensuales equivalentes: licencia de $1,650 al año y $100 por 200 folios prepagados; IVA incluido | https://facturama.mx/api-facturacion-electronica |
 
 Facturapi cobra la Licencia API: $299 al mes más $0.60 por factura, IVA incluido, con el servidor MCP incluido sin costo adicional. Con 100 facturas al mes son $359; con 200, $419. Tiene 14 días para practicar con facturas de prueba, sin costo ni tarjeta. Varios negocios (varios RFC) caben en la misma licencia.
 
@@ -142,7 +142,7 @@ En abarrotes no hay una clave para todo: cada producto lleva la suya. La clave 0
 | Abarrotes: frijol, arroz, leche, huevo, tortilla, pan y medicinas de patente | 0% |
 | Abarrotes: refrescos, jugos, agua en envase menor de 10 litros, chicles, alimento para mascotas, limpieza | 16% |
 
-En la región fronteriza norte y sur, el IVA de 16% baja a 8% con el estímulo vigente hasta el 31 de diciembre de 2026; lo que va a 0% sigue en 0%. Si el negocio vende pan en el mostrador y alguien lo come ahí sin mesas ni servicio, la norma no lo dice con todas sus letras: la regla práctica es «si hay mesas y servicio, 16%».
+Para usar IVA de 8% en lugar de 16%, revisa que el negocio cumpla los requisitos del estímulo y haya presentado el aviso al SAT: el local y la entrega de los bienes o la prestación del servicio deben estar en la región fronteriza norte o sur. El estímulo está vigente hasta el 31 de diciembre de 2026. Lo que va a 0% sigue en 0%. Resuelve esto una sola vez al dar de alta el negocio. Si el negocio vende pan en el mostrador y alguien lo come ahí sin mesas ni servicio, la norma no lo dice con todas sus letras: la regla práctica es «si hay mesas y servicio, 16%».
 
 El pan dulce y los pasteles pueden causar además IEPS de 8% para quien los hornea. En la factura a un cliente el IEPS no se desglosa ni se pregunta: va dentro del precio y la factura sale sin el impuesto por separado (Ley del IEPS, art. 19, fr. II). Solo va aparte si el cliente es contribuyente del IEPS por esos mismos bienes y lo pide. Por eso el producto se da de alta en el catálogo solo con su IVA. Si el dueño hornea, el IEPS es tema de su declaración, no de cada factura: díselo en una línea al dar de alta sus productos y ofrécele hacer la cuenta con sus números. La factura global sí separa el IEPS (sección 6).
 
@@ -323,7 +323,7 @@ Facturapi revisa los datos del cliente contra el SAT cuando lo registra, así qu
 | CFDI40161 | El uso no corresponde al régimen | G03 con régimen de negocio; S01 con 605 o 616 |
 | CFDI40105 | Método PPD sin forma de pago 99 | Si paga después, forma 99 y método PPD |
 
-Si los datos no cuadran aunque estén copiados bien, pídele al cliente que revise su constancia o sus datos en el SAT y que mande la constancia actual.
+Si los datos no cuadran aunque estén copiados bien, pídele al cliente que los revise en el SAT y te mande sus datos fiscales actualizados o, si prefiere, su constancia.
 
 ## 6. La factura global
 
@@ -339,7 +339,7 @@ Lo que nadie pidió facturar va en una factura global del día, la semana o el m
 | Clave de producto | 01010101 |
 | Unidad | ACT Actividad |
 
-Pídele al dueño el registro completo de ventas del periodo y separa las que ya tienen factura individual. Con las restantes, prepara la global y enséñale el total y los impuestos antes de pedir su sí. Si las ventas ya están registradas como recibos abiertos en Facturapi, usa la función de factura global. Si no, crea la factura de ingreso a PUBLICO EN GENERAL con los datos del periodo y los conceptos correspondientes. No supongas que Facturapi tiene los tickets de WhatsApp.
+Pídele al dueño el registro completo de ventas del periodo y separa las que ya tienen factura individual. Con las restantes, prepara la global. Usa la forma de pago del ticket de mayor importe entre los que vas a incluir; si hay empate con formas distintas, propón una de las empatadas. Si falta ese dato, pídeselo al dueño. Enséñale el total, los impuestos y la forma de pago antes de pedir su sí. Si las ventas ya están registradas como recibos abiertos en Facturapi, usa la función de factura global. Si no, crea la factura de ingreso a PUBLICO EN GENERAL con los datos del periodo y los conceptos correspondientes. No supongas que Facturapi tiene los tickets de WhatsApp.
 
 En Facturapi, la factura a PUBLICO EN GENERAL lleva el objeto `global` con la periodicidad (`day`, `week`, `fortnight`, `month` o `two_months`), el mes y el año, por ejemplo `"global": { "periodicity": "month", "months": "11", "year": 2026 }`. Su documentación lo hace obligatorio. En modo de prueba la timbra sin él, pero el XML sale sin la información global que pide el SAT: mándalo siempre. Cada ticket va como un concepto «Venta» con la clave 01010101, la unidad ACT y el folio del ticket en `sku`, que sale en el XML como número de identificación; si un ticket mezcla tasas de IVA, va un concepto por tasa con el mismo folio. La global desde recibos es del plan de recibos y autofactura, no de la Licencia API.
 
@@ -357,13 +357,13 @@ Si el cliente paga después o en partes, la factura va con forma 99 y método PP
 
 - Si hay un error, se hace la factura buena relacionada con la mala (clave «04 Sustitución de los CFDI previos») y se cancela la mala con el motivo 01 (con errores, con relación).
 - Otros motivos: 02 con errores sin relación, 03 la operación no se llevó a cabo, 04 operación nominativa relacionada en la global.
-- El cliente tiene tres días hábiles para aceptar la cancelación. Si es la primera solicitud y no responde, se tiene por aceptada; si ya la rechazó una vez y no responde, no se cancela. No necesitan su aceptación las facturas de hasta $1,000, las globales y las que se cancelan dentro del día hábil siguiente.
+- El cliente tiene tres días hábiles para aceptar o rechazar la cancelación. Si es la primera solicitud y no responde, se acepta; si ya rechazó una y no responde a las siguientes, la factura sigue vigente. Revisa en el proveedor o en el SAT que el estado sea «Cancelada». En una factura de venta como la del ejemplo no hace falta su aceptación si el total es de hasta $1,000, si es global o si la cancelas dentro del día hábil siguiente. La excepción de $1,000 no aplica al complemento de pagos.
 - Plazo: hasta el mes en que se presenta la declaración anual del año en que se emitió; para personas físicas, abril del año siguiente.
 - Quien cancela tiene que poder justificar el motivo con documentos.
 
 ## 9. Lo que nunca haces
 
-- Condicionar la factura a la constancia. Es infracción (Código Fiscal, art. 83, fr. IX), con multa de $21,420 a $122,440. Bastan RFC, nombre, código postal y régimen.
+- Condicionar la factura a la constancia. Es infracción (Código Fiscal, art. 83, fr. IX), con multa de $21,420 a $122,440 la primera vez. Bastan RFC, nombre, código postal y régimen.
 - Exigir datos que la factura no lleva, como la CURP, ni hacer obligatorio el correo.
 - Cobrar más por facturar, negar la factura porque pagó en efectivo o porque no la pidió en el momento, u obligar al cliente a facturar en un portal.
 - Poner una forma de pago distinta a la que se recibió.

@@ -184,7 +184,7 @@ export function periodicidadDe(texto) {
  * @param {Array}  datos.tickets      [{ folio, conceptos }], como los da leerTicket
  * @param {Array}  datos.productos
  * @param {object} datos.periodo      { periodicidad, mes, anio }: mes «01» a «12» (bimestral: «13» a «18»)
- * @param {string} datos.formaPago    la forma de pago que más se usó en el periodo
+ * @param {string} datos.formaPago    la forma de pago del ticket de mayor importe del periodo (si hay empate, una de las empatadas)
  * @param {object} [datos.emisor]     { rfc, regimen, codigoPostal? }
  * @param {number} [datos.folio]
  * @param {string} [datos.serie]
@@ -203,7 +203,7 @@ export function armarGlobal({ tickets, productos, periodo, formaPago, emisor, fo
   const anio = Number(p.anio);
   if (!Number.isInteger(anio) || anio < 2022 || anio > 2100) errores.push("Falta el año de la global, con cuatro cifras.");
   const forma = String(formaPago || "").trim();
-  if (!FORMAS_PAGO.some((f) => f.clave === forma) || forma === FORMA_POR_DEFINIR) errores.push("Falta la forma de pago de la global (la que más se usó en el periodo); no puede ser 99.");
+  if (!FORMAS_PAGO.some((f) => f.clave === forma) || forma === FORMA_POR_DEFINIR) errores.push("Falta la forma de pago de la global (la del ticket de mayor importe del periodo); no puede ser 99.");
   if (!tickets || !tickets.length) errores.push("No hay tickets para la global.");
 
   const resicoFisica = !!emisor && String(emisor.regimen || "").trim() === REGIMEN_RESICO && revisarRfc(emisor.rfc).rfc.length === 13;
