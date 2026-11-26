@@ -145,7 +145,7 @@ El pan dulce y los pasteles pueden causar además IEPS de 8% para quien los horn
 Si los datos del cliente llegan por WhatsApp, la ley de datos personales pide un aviso de privacidad simplificado. Ármale al dueño el suyo con este texto y sus datos, para mandarlo o ligarlo cuando pida los datos:
 
 ```
-Aviso de privacidad. [Responsable y negocio], con domicilio en [domicilio completo], usa tu RFC, nombre, código postal, régimen y datos de compra para preparar, emitir y entregarte tu factura. Para hacerlo utiliza [asistente de IA] y [proveedor de facturas]. Para limitar el uso o divulgación de tus datos y ejercer tus derechos de acceso, rectificación, cancelación u oposición, escríbenos a [contacto]. Aviso completo: [liga].
+Aviso de privacidad. [Responsable y negocio], con domicilio en [domicilio completo], usa tu RFC, nombre, código postal, régimen, los demás datos de tu constancia de situación fiscal si nos la mandas, tu número de WhatsApp o tu correo y los datos de tu compra para preparar, emitir y entregarte tu factura. Ninguno es un dato sensible. Para hacerlo utiliza [asistente de IA] y [proveedor de facturas]. Para limitar el uso o divulgación de tus datos y ejercer tus derechos de acceso, rectificación, cancelación u oposición, escríbenos a [contacto]. Aviso completo: [liga].
 ```
 
 Pedir los datos para facturar no necesita consentimiento: lo manda la ley. RFC, nombre y código postal no son datos sensibles. Buena práctica: borrar la foto o el PDF de la constancia después de facturar, no pedir la CURP (la factura no la usa) y nunca reenviar la constancia de un cliente a otro.
@@ -321,6 +321,8 @@ Lo que nadie pidió facturar va en una factura global del día, la semana o el m
 | Unidad | ACT Actividad |
 
 Pídele al dueño el registro completo de ventas del periodo y separa las que ya tienen factura individual. Con las restantes, prepara la global y enséñale el total y los impuestos antes de pedir su sí. Si las ventas ya están registradas como recibos abiertos en Facturapi, usa la función de factura global. Si no, crea la factura de ingreso a PUBLICO EN GENERAL con los datos del periodo y los conceptos correspondientes. No supongas que Facturapi tiene los tickets de WhatsApp.
+
+En Facturapi, la factura a PUBLICO EN GENERAL lleva el objeto `global` con la periodicidad, los meses y el año; sin él la rechaza. La global desde recibos es del plan de recibos y autofactura, no de la Licencia API.
 
 - La global separa el IVA y, si el negocio lo causa, el IEPS.
 - En RESICO de personas físicas va solo el monto total de las operaciones del periodo.
