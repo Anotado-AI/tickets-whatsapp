@@ -89,17 +89,22 @@ La guía «Facturar desde cero» explica el RFC, el régimen, la e.firma y el se
 
 ### La conexión del proveedor contigo
 
-Facturapi MCP es un servidor remoto en `https://mcp.facturapi.io/mcp`. Hay dos formas de entrar, con las mismas funciones: iniciar sesión con la cuenta de Facturapi (el dueño escoge «solo lectura» o «lectura y escritura»; para facturar hace falta escritura) o poner una llave de API en el encabezado `Authorization: Bearer`. Por defecto trabaja en producción. Para practicar, di «trabaja en modo pruebas» o usa la llave de prueba. Con el servidor puedes crear, consultar, cancelar y descargar facturas en PDF y XML, emitir recibos con liga de autofactura y hacer facturas globales. Los nombres exactos de sus funciones los ves al conectarte. El dueño revisa y quita los permisos en el Centro de integración del panel de Facturapi.
+Facturapi MCP es un servidor remoto en `https://mcp.facturapi.io/mcp`. Hay dos formas de entrar, con las mismas funciones: iniciar sesión con la cuenta de Facturapi (el dueño escoge «solo lectura» o «lectura y escritura»; para facturar hace falta escritura) o poner una llave de API en el encabezado `Authorization: Bearer`. Por defecto trabaja en producción. Para practicar, di «trabaja en modo pruebas» o usa la llave de prueba. Con el servidor puedes crear, consultar, cancelar y descargar facturas en PDF y XML (la descarga da una liga que vence en una hora), emitir recibos con liga de autofactura y hacer facturas globales. Los nombres exactos de sus funciones los ves al conectarte. El dueño revisa y quita los permisos en el Centro de integración del panel de Facturapi.
 
 Claude, en la web o en la app de escritorio (todos los planes; en Free, un solo conector propio). Los botones se llaman así en la ayuda de Claude, en inglés:
 
 1. Customize, Connectors.
 2. «+ Add» y «Add custom connector».
-3. Nombre: Facturapi. Liga: `https://mcp.facturapi.io/mcp`. «Continue».
-4. En Authentication, «Sign in now»: abre el inicio de sesión de Facturapi. En lugar de eso, en «Request headers» se puede poner la llave fija.
-5. «Add».
+3. Nombre: Facturapi.
+4. Liga: `https://mcp.facturapi.io/mcp`. «Continue».
+5. Revisa la autenticación que Claude detectó y toca «Continue».
+6. En Authentication, «Sign in now»: abre el inicio de sesión de Facturapi.
+7. En OAuth client, «Use Claude's published identity (Recommended)».
+8. «Add».
 
-En Team y Enterprise lo agrega el dueño de la organización y cada miembro toca «Connect». En cada conversación se enciende con el botón «+», Connectors, Facturapi. Una vez agregado en la computadora, el conector aparece en Claude para iPhone y Android: el dueño factura desde el celular.
+«Request headers» es para quien prefiere poner la llave fija de Facturapi en lugar de iniciar sesión.
+
+En Team y Enterprise lo agrega un Owner o Primary Owner en Organization settings, Connectors: «Add», «Custom», «Web» y los mismos datos. Cada miembro lo busca en Customize, Connectors y toca «Connect». En cada conversación se enciende con el botón «+», Connectors, Facturapi. Una vez agregado en la computadora, el conector aparece en Claude para iPhone y Android: el dueño factura desde el celular.
 
 ChatGPT acepta servidores MCP propios con escritura solo en Business y Enterprise o Edu, en la web, y los agrega un administrador o el dueño de la cuenta: Plugins, «+», «Add custom MCP server», nombre, la liga del servidor, la autenticación, aceptar el aviso y «Create as a plugin». No hace falta encender el modo de desarrollador. En Pro, los servidores propios solo leen. En Free, Go y Plus no aparecen. En el celular no se conectan. Con ChatGPT personal haces todo menos timbrar: lees la constancia y el ticket y le das al dueño los datos listos para capturarlos en el panel de Facturapi o en «Genera tu factura» del SAT.
 
@@ -227,7 +232,7 @@ Total $352.00 · IVA $0.00 · ¿La timbro?
 
 Si lleva retención de ISR, el resumen la enseña antes de preguntar: «Retención de ISR 1.25% $4.40 · Total a recibir $347.60».
 
-Con su sí, timbra y dale el PDF y el XML. El dueño se los reenvía al cliente por WhatsApp; la app gratuita del propio SAT dice que la factura se comparte por correo o WhatsApp. Si el cliente la quiere por correo, el proveedor se la manda con los dos archivos adjuntos, pero darle el correo es opcional para el cliente.
+Con su sí, timbra y dale el PDF y el XML. Si el proveedor te los da como ligas de descarga, como Facturapi, avísale al dueño que vencen en una hora: que abra cada liga, baje los dos archivos y se los reenvíe al cliente por WhatsApp como archivos, no la liga. En Claude con un conector propio siempre llegan como ligas, porque ahí Claude no puede pasarle archivos a la app conectada ni guardar los que ella genera. Si se le pasó la hora, pide ligas nuevas de la misma factura; no la timbres otra vez. La app gratuita del propio SAT dice que la factura se comparte por correo o WhatsApp. Si el cliente la quiere por correo, el proveedor se la manda con los dos archivos adjuntos, pero darle el correo es opcional para el cliente.
 
 Hay que hacer la factura dentro de las 24 horas siguientes a la venta. Si el cliente la pide después, igual se le hace: negarla porque no la pidió en el momento es práctica indebida.
 
